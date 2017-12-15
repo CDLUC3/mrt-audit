@@ -107,7 +107,7 @@ public class FixityServiceProperties
             serviceProperties = new Properties();
             serviceProperties.load(fis);
             setupProperties.putAll(serviceProperties);
-            System.out.println(PropertiesUtil.dumpProperties(NAME + "setupProperties", setupProp));
+            System.out.println(PropertiesUtil.dumpProperties(MESSAGE + "setupProperties", setupProp));
             logger = new TFileLogger("fixity", logDir.getCanonicalPath() + '/', setupProp);
             FixityServiceState state = new FixityServiceState(serviceProperties);
             fixityState = new FixityState(fixityInfo);
