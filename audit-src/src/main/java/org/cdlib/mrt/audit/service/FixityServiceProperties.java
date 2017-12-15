@@ -94,7 +94,6 @@ public class FixityServiceProperties
             if (!logDir.exists()) {
                 logDir.mkdir();
             }
-            logger = new TFileLogger("fixity", logDir.getCanonicalPath() + '/', setupProp);
             if (DEBUG) System.out.println("***logger set up at " + logDir.getCanonicalPath()
                     + " - " + PropertiesUtil.dumpProperties("setupProp", setupProp)
                     );
@@ -108,6 +107,8 @@ public class FixityServiceProperties
             serviceProperties = new Properties();
             serviceProperties.load(fis);
             setupProperties.putAll(serviceProperties);
+            System.out.println(PropertiesUtil.dumpProperties(NAME + "setupProperties", setupProp));
+            logger = new TFileLogger("fixity", logDir.getCanonicalPath() + '/', setupProp);
             FixityServiceState state = new FixityServiceState(serviceProperties);
             fixityState = new FixityState(fixityInfo);
             db = new FixityItemDB(logger, setupProp);
