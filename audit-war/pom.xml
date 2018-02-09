@@ -146,12 +146,6 @@
             <!--version>0.7.2-SNAPSHOT</version-->
             <version>0.7.1-rc3</version>
         </dependency>
-  
-        <dependency>
-          <groupId>org.apache.tika</groupId>
-          <artifactId>tika-app</artifactId>
-          <version>1.2</version>
-        </dependency>
 
         <dependency>
             <groupId>mysql</groupId>
@@ -164,6 +158,27 @@
         <artifactId>log4j</artifactId>
         <version>1.2.16</version>
       </dependency>
+      
+      
+  <!-- upgrade tika handling >> -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.17</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+        </dependency> 
+<!-- << upgrade tika handling -->
   </dependencies>
   
 </project>
