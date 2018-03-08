@@ -55,7 +55,7 @@ public class RewriteEntry
 
     protected LoggerInf logger = null;
     protected File entryFile = null;
-    protected Vector<RMap> mapper = new Vector(20);
+    protected Vector<RMap> mapper = new Vector<>(20);
 
     public RewriteEntry(
             File entryFile,
