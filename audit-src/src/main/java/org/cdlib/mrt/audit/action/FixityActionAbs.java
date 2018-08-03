@@ -33,6 +33,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.cdlib.mrt.audit.db.FixityItemDB;
 
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.db.InvAudit;
@@ -116,6 +117,15 @@ public class FixityActionAbs
         throws TException
     {
         return new FixityReportSQL(select, logger);
+
+    }
+
+    public static FixityCleanup getFixityCleanup(
+            FixityServiceProperties fixityServiceProperties,
+            LoggerInf logger)
+        throws TException
+    {
+        return new FixityCleanup(fixityServiceProperties, logger);
 
     }
 

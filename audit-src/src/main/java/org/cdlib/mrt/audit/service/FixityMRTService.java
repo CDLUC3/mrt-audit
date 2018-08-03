@@ -48,6 +48,7 @@ import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.audit.action.ProcessFixityEntry;
+import org.cdlib.mrt.audit.action.FixityCleanup;
 import org.cdlib.mrt.audit.action.FixityEmailWrapper;
 import org.cdlib.mrt.audit.action.FixityActionAbs;
 import org.cdlib.mrt.audit.action.FixityReportEntries;
@@ -244,6 +245,41 @@ public class FixityMRTService
                 logger);
             ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
             threadExecutor.execute( sqlReportWrapper ); // start task1
+            threadExecutor.shutdown();
+            Thread.sleep(3000);
+            FixitySubmittedState retState = new FixitySubmittedState(true);
+            return retState;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+    }
+
+    @Override
+    public FixitySubmittedState doCleanup(String formatType)
+        throws TException
+    {
+        if (fixityServiceProperties.isShutdown()) {
+            throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
+        }
+        FixityItemDB db = null;
+        try {
+            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceProperties, logger);
+            db = fixityServiceProperties.getDb();
+            FixityEmailWrapper cleanupWrapper = new FixityEmailWrapper(
+                fix,
+                true,
+                fix.getEmailTo(),
+                fix.getEmailFrom(),
+                fix.getEmailSubject(),
+                fix.getEmailMsg(),
+                "xml",
+                db,
+                fixityServiceProperties.getSetupProperties(),
+                logger);
+            ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
+            threadExecutor.execute(cleanupWrapper ); // start task1
             threadExecutor.shutdown();
             Thread.sleep(3000);
             FixitySubmittedState retState = new FixitySubmittedState(true);

@@ -126,4 +126,8 @@ public class FixitySelectState
         this.sql = sql;
     }
 
+    public ArrayList<Properties> retrieveRows()
+    {
+        return rows;
+    }
 }

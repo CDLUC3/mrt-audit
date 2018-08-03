@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="mrt-auditwarpub:war">
+    <output-path>$PROJECT_DIR$/audit-war/target</output-path>
+    <root id="archive" name="mrt-auditwarpub-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="mrt-auditwarpub:war exploded" />
+    </root>
+  </artifact>
+</component>
