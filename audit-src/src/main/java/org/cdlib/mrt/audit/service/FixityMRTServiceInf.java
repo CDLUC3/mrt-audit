@@ -72,6 +72,9 @@ public interface FixityMRTServiceInf
 
     public FixitySubmittedState getSelectReport(String select, String email, String formatType)
         throws TException;
+    
+    public FixitySubmittedState doCleanup(String formatType)
+        throws TException;
 
     public FixitySubmittedState getEntryReport(InvAudit audit, String email, String formatType)
         throws TException;

@@ -175,6 +175,18 @@ public class JerseyFixity
         long auditID = Long.parseLong(auditIDS);
         return updateAuditEntry(auditID, formatType, cs, sc);
     }
+  
+
+    @POST
+    @Path("cleanup")
+    public Response callCleanup(
+            @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        return cleanupAudit(formatType, cs, sc);
+    }  
     
 /*
     
@@ -482,6 +494,43 @@ public class JerseyFixity
             entries[0] = entry;
             FixityEntriesState responseState = new FixityEntriesState(entries);
             return getStateResponse(responseState, formatType, logger, cs, sc);
+
+        } catch (TException tex) {
+            return getExceptionResponse(tex, formatType, logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+
+    /**
+     * Update individual entry using audit entry id
+     * @param auditID inv_audit entry
+     * @param formatType
+     * @param cs
+     * @param sc
+     * @return
+     * @throws TException 
+     */
+    public Response cleanupAudit(
+            String formatType,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("cleanupAudit entered:"
+                    );
+            FixityServiceInit fixityServiceInit = FixityServiceInit.getFixityServiceInit(sc);
+            FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
+            fixityService.doCleanup(formatType);
+            logger = fixityService.getLogger();
+
+            StateInf responseState = fixityService.getFixityServiceStatus();
+            return getStateResponse(responseState, formatType, logger, cs, sc);
+
 
         } catch (TException tex) {
             return getExceptionResponse(tex, formatType, logger);
