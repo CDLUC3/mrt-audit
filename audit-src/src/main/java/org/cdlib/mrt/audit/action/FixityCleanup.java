@@ -293,7 +293,8 @@ public class FixityCleanup
         DateState dstate = new DateState();
         String ctime= dstate.getIsoDate();
         emailSubject = getMail(NAME + ".emailSubject", 
-                "FixityCleanup report: " + ctime);
+                "FixityCleanup Report");
+        emailSubject += ": " + ctime;
         emailFrom = getMail(NAME + ".emailFrom","merritt@ucop.edu");
         emailTo =  getMail(NAME + ".emailTo", null);
         if (emailTo == null) {
