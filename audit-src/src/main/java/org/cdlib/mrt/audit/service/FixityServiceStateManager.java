@@ -217,11 +217,11 @@ public class FixityServiceStateManager
 
             state.setNumFailedItems(getNum(sql, "count(id)", connection));
 
-            sql = "select count(id) "
+            sql = "select count(id) as unavailable "
                     + "from " + FixNames.AUDIT_TABLE + " "
-                    + "where status='system-unavailable'";
+                    + "where (status='system-unavailable' or status='unverified')";
 
-            state.setNumUnavailable(getNum(sql, "count(id)", connection));
+            state.setNumUnavailable(getNum(sql, "unavailable", connection));
             if (DEBUG) System.out.println(MESSAGE + "addCounts - TotalSize:" + state.getTotalSize());
             return;
 

@@ -45,6 +45,7 @@ import org.apache.http.StatusLine;
 
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
+import static org.cdlib.mrt.audit.handler.FixityHandlerMRTStore.normalizeQuery;
 import org.cdlib.mrt.audit.service.FixityServiceProperties;
 import org.cdlib.mrt.s3.service.NodeIO;
 import org.cdlib.mrt.core.DateState;
@@ -118,9 +119,14 @@ public class FixityUtil
                 if (DEBUG) System.out.println("NearLineResult null");
             }
             try {
+                if (DEBUG) System.out.println("runTest"
+                        + " - Location:" + location
+                        + " - timeout:" + timeout
+                        );
                 inputStream = getNodeStream(location, timeout);
-                if (DEBUG && (inputStream == null)) {
-                    System.out.println("!!!FixityUtil inputStream null:" + location);
+                if (inputStream == null) {
+                    if (DEBUG) System.out.println("!!!FixityUtil inputStream null:" + location);
+                    throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "item not found:" + location);
                 }
 
             } catch (TException.EXTERNAL_SERVICE_UNAVAILABLE tex) {
@@ -330,13 +336,73 @@ public class FixityUtil
         throws Exception
     {
         InputStream inputStream = null;
+        Exception runex = null;
         NodeIO nodeIO = FixityServiceProperties.getNodeIO();
         if (nodeIO != null) {
-            try {
-                inputStream = nodeIO.getInputStream(location);
-                if (DEBUG) System.out.println(MESSAGE + "NodeIO used");
-            } catch (Exception ex) {
-                inputStream = null;
+            for (int retry=0; retry < 3; retry++) {
+                try {
+                    inputStream = nodeIO.getInputStream(location);
+                    if (DEBUG) System.out.println(MESSAGE + "getNodeStream - NodeIO InputStream found");
+                    return inputStream;
+                    
+                } catch (TException.INVALID_OR_MISSING_PARM iomp) {
+                    runex = iomp;
+                    Thread.sleep(3000);
+                    continue;
+                    
+                } catch (TException.REQUESTED_ITEM_NOT_FOUND rinf) {
+                    runex = rinf;
+                    Thread.sleep(3000);
+                    continue;
+                    
+                } catch (TException.EXTERNAL_SERVICE_UNAVAILABLE esu) {
+                    break;
+                    
+                } catch (Exception ex) {
+                    System.out.println("FixityUtil Exception:" + ex);
+                    runex = ex;
+                    Thread.sleep(3000);
+                    continue;
+                }
+            }
+        }
+        
+        if ( (runex != null) && !(runex instanceof TException.EXTERNAL_SERVICE_UNAVAILABLE)) {
+            throw runex;
+        }
+        
+        // use storage server
+        
+        inputStream = getInputStream(location, timeout);
+        if (DEBUG) System.out.println(MESSAGE + "getNodeStream - Storage InputStream found");
+        return inputStream;
+    }
+
+    
+    private static InputStream getNodeStreamOld(String location, int timeout)
+        throws Exception
+    {
+        InputStream inputStream = null;
+        NodeIO nodeIO = FixityServiceProperties.getNodeIO();
+        if (nodeIO != null) {
+            for (int retry=0; retry < 3; retry++) {
+                try {
+                    inputStream = nodeIO.getInputStream(location);
+                    if (DEBUG) System.out.println(MESSAGE + "NodeIO used");
+                    break;
+                    
+                } catch (TException.INVALID_OR_MISSING_PARM iomp) {
+                    inputStream = null;
+                    break;
+                    
+                } catch (TException.REQUESTED_ITEM_NOT_FOUND rinf) {
+                    throw rinf;
+                    
+                } catch (Exception ex) {
+                    System.out.println("FixityUtil Exception:" + ex);
+                    Thread.sleep(3000);
+                    inputStream = null;
+                }
             }
         }
         if (inputStream == null) {

@@ -92,7 +92,8 @@ public class TestFixityCleanup
         Connection connection = null;
         try {
             String propertyList[] = {
-                "resources/TestFixityCleanup.properties"};
+                //"resources/TestFixityCleanup.properties"};
+                "resources/TestFixityCleanupStage.properties"};
             tFrame = new TFrame(propertyList, "TestFixity");
             Properties prop = tFrame.getProperties();
             fixityServiceProperties

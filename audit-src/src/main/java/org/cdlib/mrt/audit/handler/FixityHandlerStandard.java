@@ -86,6 +86,25 @@ public class FixityHandlerStandard
     {
         FixityStatusType fixityStatus = null;
         try {
+            
+                if (DEBUG) System.out.println(MESSAGE + "runFixity entry:" + entry.getItemKey());
+                FixityUtil.runTest(entry, 300000, logger);
+                fixityStatus = entry.getStatus();
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            throw new TException.GENERAL_EXCEPTION(ex);
+        }
+
+    }
+    
+    public void runFixityOriginal()
+        throws TException
+    {
+        FixityStatusType fixityStatus = null;
+        try {
             for (int ifix=0; ifix<3; ifix++) {
                 if (DEBUG) System.out.println(MESSAGE + "runFixity entry:" + entry.getItemKey());
                 FixityUtil.runTest(entry, 300000, logger);

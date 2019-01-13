@@ -49,6 +49,7 @@ public class FixitySelectState
     private static final String NAME = "FixitySelectState";
     private static final String MESSAGE = NAME + ": ";
 
+    protected Integer count = null;
     protected DateState reportDate = new DateState();
     protected String sql = null;
     protected ArrayList<Properties> rows = new ArrayList<Properties>();
@@ -129,5 +130,13 @@ public class FixitySelectState
     public ArrayList<Properties> retrieveRows()
     {
         return rows;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }

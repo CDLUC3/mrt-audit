@@ -29,6 +29,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.audit.action;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -39,6 +40,7 @@ import org.cdlib.mrt.audit.service.FixitySelectState;
 import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.service.FixityServiceProperties;
+import org.cdlib.mrt.audit.service.RewriteEntry;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FixityStatusType;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -78,8 +80,10 @@ public class FixityCleanup
             "select a.* "
             + "from inv_audits as a "
             + "where (a.status='system-unavailable' "
-            + "or a.status='unverified')";
-        //    + "limit 30;"; //!!! delete at future point
+            + "or a.status='unverified') "
+            + "and a.inv_node_id=3 "
+            + "limit 500;"; //!!! delete at future point
+            ;
 
     protected Properties [] rows = null;
     protected Properties setupProperties = null;protected String msg = null;
@@ -87,6 +91,10 @@ public class FixityCleanup
     protected String emailTo = null;
     protected String emailSubject = null;
     protected String emailMsg = null;
+    protected String emailFormat = null;
+    protected Integer testMax = null;
+    protected RewriteEntry rewrite = null;
+    protected int processCnt = 0;
     
     protected FixityCleanup(
             FixityItemDB db,
@@ -105,6 +113,9 @@ public class FixityCleanup
         super(null, null, logger);
         this.db = fixityServiceProperties.getDb();
         this.setupProperties = fixityServiceProperties.getSetupProperties();
+        File fixityService = fixityServiceProperties.getFixityService();
+        File mapFile = new File(fixityService, "rewrite.txt");
+        this.rewrite = new RewriteEntry(mapFile,logger);
         buildEmail();
     }
 
@@ -125,6 +136,7 @@ public class FixityCleanup
             if (DEBUG) System.out.println(MESSAGE + "rows cnt:" + rows.length);
             fixitySelect = new FixitySelectState(rows);
             fixitySelect.setSql(selectRetry);
+            fixitySelect.setCount(processCnt);
             fixitySelect.replaceFixityEntries(testList);
 
         } catch (Exception ex) {
@@ -143,17 +155,30 @@ public class FixityCleanup
         }
 
     }
-    
+
     protected ArrayList<Properties> buildList(Properties [] rows)
         throws TException
     {
         ArrayList<Properties> stateList = new ArrayList();
         try {
             for (Properties row: rows) {
+                processCnt++;
+        if (DEBUG) System.out.println("***rowlist:"
+                + " - processCnt=" + processCnt
+                + " - stateList.size()=" + stateList.size()
+                + " - testMax=" + testMax + '\n'
+                + PropertiesUtil.dumpProperties("ROW", row, 0)
+        );
+                if (testMax != null) {
+                    if (stateList.size() >= testMax) break;
+                }
                 EntryTest test = processEntry(row);
                 Properties testProp = test.getProp();
-                if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("FixityCleanupOut", row));
-                stateList.add(testProp);
+                if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("FixityCleanupOut", testProp));
+                String status = testProp.getProperty("fixityStatus");
+                if (!status.equals("verified")) {
+                    stateList.add(testProp);
+                }
             }
             return stateList;
 
@@ -180,17 +205,36 @@ public class FixityCleanup
         try {
             log("run entered");
             
-            upConnect = db.getConnection(false);
+            upConnect = db.getConnection(true);
             InvAudit audit = new InvAudit(logger);
+            //String mapUrl = mapAudit.getMapURL();
+            //mrtEntry.setMapURL(mapUrl);
             audit.setProp(row);
+            audit = rewrite.map(audit);
             
             entryTest.auditid = audit.getId();
+            if (DEBUG) System.out.println("***AUDITID=" + audit.getId()
+                    + " - mapURL=" + audit.getMapURL()
+            );
             setNodeKey(entryTest);
             if (entryTest.ex != null){
                 return entryTest;
             }
+            /*
+            if (audit.getNote() != null) {
+                if (audit.getNote().contains("responseCode:404")) {
+                    DateState verified = audit.getVerified();
+                    entryTest.verifiedDate = verified.getIsoDate();
+                    entryTest.fixityStatus = audit.getStatus();
+                    //entryTest.
+                    throw new TException.REQUESTED_ITEM_NOT_FOUND(audit.getNote());
+                }
+            }
+*/
             ProcessFixityEntry pfe = getProcessFixityEntry("update", audit, upConnect,logger);
             FixityMRTEntry entry = pfe.call();
+            if (DEBUG) System.out.println(entry.dump("+++processed+++"));
+//            FixityDBUtil.replaceInvAudit(upConnect, entry, logger);
             Exception ex = getException();
             if (ex != null) {
                 throw ex;
@@ -296,6 +340,7 @@ public class FixityCleanup
                 "FixityCleanup Report");
         emailSubject += ": " + ctime;
         emailFrom = getMail(NAME + ".emailFrom","merritt@ucop.edu");
+        emailFormat = getMail(NAME + ".emailFormat","xml");
         emailTo =  getMail(NAME + ".emailTo", null);
         if (emailTo == null) {
             throw new TException.INVALID_OR_MISSING_PARM(NAME + ".emailTo required");
@@ -352,6 +397,22 @@ public class FixityCleanup
 
     public void setEmailMsg(String emailMsg) {
         this.emailMsg = emailMsg;
+    }
+
+    public String getEmailFormat() {
+        return emailFormat;
+    }
+
+    public void setEmailFormat(String emailFormat) {
+        this.emailFormat = emailFormat;
+    }
+
+    public Integer getTestMax() {
+        return testMax;
+    }
+
+    public void setTestMax(Integer testMax) {
+        this.testMax = testMax;
     }
     
     public static class EntryTest {
