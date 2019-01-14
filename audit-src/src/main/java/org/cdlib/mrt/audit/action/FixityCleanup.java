@@ -128,11 +128,13 @@ public class FixityCleanup
             log("run entered");
             connection = db.getConnection(true);
             rows = FixityDBUtil.cmd(connection, selectRetry, logger);
+            ArrayList<Properties> testList = new ArrayList<>();
             if ((rows == null) || (rows.length == 0)) {
                 System.out.println(MESSAGE + " null results");
-                return;
+                rows = new Properties[0];
+            } else {
+                testList = buildList(rows);
             }
-            ArrayList<Properties> testList = buildList(rows);
             if (DEBUG) System.out.println(MESSAGE + "rows cnt:" + rows.length);
             fixitySelect = new FixitySelectState(rows);
             fixitySelect.setSql(selectRetry);
