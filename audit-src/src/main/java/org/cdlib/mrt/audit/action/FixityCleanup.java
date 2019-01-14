@@ -82,7 +82,7 @@ public class FixityCleanup
             + "where (a.status='system-unavailable' "
             + "or a.status='unverified') "
             + "and a.inv_node_id=3 "
-            + "limit 500;"; //!!! delete at future point
+            //+ "limit 500;"; //!!! delete at future point
             ;
 
     protected Properties [] rows = null;
