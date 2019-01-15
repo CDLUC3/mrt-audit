@@ -62,6 +62,7 @@ public class FixityServiceState
     protected Long numItems = null;
     protected Long numFailedItems = null;
     protected Long numUnavailable = null;
+    protected Long numUnverified = null;
     protected StateStatus status = StateStatus.unknown;
     protected FixityStatusType type = null;
     protected DateState created = null;
@@ -357,6 +358,14 @@ public class FixityServiceState
 
     public void setNumUnavailable(Long numUnavailable) {
         this.numUnavailable = numUnavailable;
+    }
+
+    public Long getNumUnverified() {
+        return numUnverified;
+    }
+
+    public void setNumUnverified(Long numUnverified) {
+        this.numUnverified = numUnverified;
     }
 
     /**

@@ -219,9 +219,17 @@ public class FixityServiceStateManager
 
             sql = "select count(id) as unavailable "
                     + "from " + FixNames.AUDIT_TABLE + " "
-                    + "where (status='system-unavailable' or status='unverified')";
+                    + "where status='system-unavailable'";
 
             state.setNumUnavailable(getNum(sql, "unavailable", connection));
+            if (DEBUG) System.out.println(MESSAGE + "addCounts - TotalSize:" + state.getTotalSize());
+
+            sql = "select count(id) as unverified "
+                    + "from " + FixNames.AUDIT_TABLE + " "
+                    + "where status='unverified'";
+
+            state.setNumUnverified(getNum(sql, "unverified", connection));
+            
             if (DEBUG) System.out.println(MESSAGE + "addCounts - TotalSize:" + state.getTotalSize());
             return;
 
