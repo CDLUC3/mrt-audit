@@ -198,6 +198,14 @@ public class FixityActionAbs
         FixityDBUtil.updateInvAudit(id, connection, prop, logger);
     }
 
+    protected boolean ownProcessing(long id)
+        throws TException
+    {
+        int updates = FixityDBUtil.ownInvAudit(id, connection, logger);
+        if (updates == 1) return true;
+        return false;
+    }
+    
     protected void insertEntry()
         throws TException
     {

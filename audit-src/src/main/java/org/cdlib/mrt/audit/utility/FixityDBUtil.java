@@ -202,6 +202,42 @@ public class FixityDBUtil
         }
     }
 
+    public static int update(
+            Connection connection,
+            String replaceCmd,
+            LoggerInf logger)
+        throws TException
+    {
+        if (StringUtil.isEmpty(replaceCmd)) {
+            throw new TException.INVALID_OR_MISSING_PARM("replaceCmd not supplied");
+        }
+        if (connection == null) {
+            throw new TException.INVALID_OR_MISSING_PARM("connection not supplied");
+        }
+        Statement statement = null;
+        try {
+
+            statement = connection.createStatement();
+            ResultSet resultSet = null;
+            int rowCnt = statement.executeUpdate(replaceCmd);
+            return rowCnt;
+
+        } catch(Exception e) {
+            String msg = "Exception"
+                + " - sql=" + replaceCmd
+                + " - exception:" + e;
+
+            logger.logError(MESSAGE + "exec - " + msg, 0);
+            System.out.println(msg);
+            throw new TException.SQL_EXCEPTION(msg, e);
+            
+        } finally {
+	    try {
+	       statement.close();
+	    } catch (Exception e) {}
+	}
+    }
+    
     public static void replaceInvAudit(
             Connection connection,
             FixityMRTEntry entry,
@@ -281,8 +317,34 @@ public class FixityDBUtil
         }
         String updateCmd = UPDATE_ITEM + buildModify(prop) + " where id=" + id + ";";
         return exec(connection, updateCmd, logger);
-     }
-
+    }
+    
+    public static int ownInvAudit(
+            long id,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        String sql = "update inv_audits "
+            + "set status='processing' "
+            + "where id=" + id + " "
+            + "and not status='processing'"
+            + "and not DATE(verified)=DATE(NOW());";
+        
+        try {
+            if (connection == null) {
+                throw new TException.INVALID_OR_MISSING_PARM("connection not supplied");
+            }
+            connection.setAutoCommit(true);
+            int updateCnt = update(connection, sql, logger);
+            logger.logMessage("audit updates(" + id + ")=" + updateCnt, 5, true);
+            return updateCnt;
+        
+        } catch (Exception ex) {
+            return 0;
+        }
+    }
+    
     public static String buildModify(Properties prop)
     {
         Enumeration e = prop.propertyNames();

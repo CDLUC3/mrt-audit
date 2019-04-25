@@ -35,6 +35,7 @@ import java.util.Properties;
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.handler.FixityHandler;
 import org.cdlib.mrt.audit.handler.FixityHandlerAbs;
+import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
@@ -64,6 +65,9 @@ public class FixityValidation
     public void run()
     {
         try {
+            if (!ownProcessing(mrtEntry.getItemKey())) {
+                return;
+            }
             connection.setAutoCommit(false);
             setProcessing(mrtEntry.getItemKey());
             handler.runFixity();
