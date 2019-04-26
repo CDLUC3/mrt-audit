@@ -329,7 +329,7 @@ public class FixityDBUtil
             + "set status='processing' "
             + "where id=" + id + " "
             + "and not status='processing'"
-            + "and not DATE(verified)=DATE(NOW());";
+            + "and ((verified is NULL) OR (not DATE(verified)=DATE(NOW())));";
         
         try {
             if (connection == null) {
