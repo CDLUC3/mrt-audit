@@ -212,6 +212,9 @@ public class FixityMRTService
         }
         Connection connection = fixityServiceProperties.getConnection(false);
         InvAudit audit = FixityDBUtil.getAudit(connection, id, localLog);
+        if (audit == null) {
+            throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "update item not found:" + id);
+        }
         RewriteEntry rewriteEntry = fixityServiceProperties.getRewriteEntry();
         if (rewriteEntry != null) {
             rewriteEntry.map(audit);
