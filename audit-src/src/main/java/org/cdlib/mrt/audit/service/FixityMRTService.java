@@ -398,7 +398,7 @@ public class FixityMRTService
                 threadExecutor.shutdown();
                 Thread.sleep(3000);
             }
-            FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceState();
+            FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceStatus();
             setProcessCount(fixityServiceState);
             fixityServiceProperties.startPeriodicReport();
             if (THREADDEBUG) FixityUtil.sysoutThreads("End setFixityRun");
@@ -421,7 +421,7 @@ public class FixityMRTService
             if (fixityState.isFixityProcessing() && fixityState.isRunFixity()) {
                 fixityState.setRunFixity(false);
             }
-            FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceState();
+            FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceStatus();
             setProcessCount(fixityServiceState);
             if (THREADDEBUG) FixityUtil.sysoutThreads("End setFixityStop");
             return fixityServiceState;
