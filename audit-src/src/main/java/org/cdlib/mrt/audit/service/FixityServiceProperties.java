@@ -131,7 +131,7 @@ public class FixityServiceProperties
                 scheme.buildNamasteFile(fixityService);
             }
 
-            setPeriodicReport();
+            //setPeriodicReport();
 
         } catch (Exception ex) {
             throw new TException(ex);
@@ -163,7 +163,7 @@ public class FixityServiceProperties
         try {
             fixityState.set();
             setRewriteEntry();
-            setPeriodicReport();
+            //setPeriodicReport();
 
         } catch (Exception ex) {
             throw new TException(ex);

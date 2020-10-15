@@ -400,7 +400,7 @@ public class FixityMRTService
             }
             FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceStatus();
             setProcessCount(fixityServiceState);
-            fixityServiceProperties.startPeriodicReport();
+            //fixityServiceProperties.startPeriodicReport();
             if (THREADDEBUG) FixityUtil.sysoutThreads("End setFixityRun");
             return fixityServiceState;
 
@@ -437,7 +437,7 @@ public class FixityMRTService
     {
         if (THREADDEBUG) FixityUtil.sysoutThreads("Begin setShutdown");
         fixityServiceProperties.setShutdown(true);
-        fixityServiceProperties.shutdownPeriodicReport();
+        //fixityServiceProperties.shutdownPeriodicReport();
         fixityServiceProperties.dbShutDown();
         if (THREADDEBUG) FixityUtil.sysoutThreads("End setShutdown");
         return setFixityStop();

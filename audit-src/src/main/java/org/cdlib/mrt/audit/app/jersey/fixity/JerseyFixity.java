@@ -93,7 +93,8 @@ public class JerseyFixity
             @Context ServletConfig sc)
         throws TException
     {
-        return getServiceState(formatType, cs, sc);
+        // return getServiceState(formatType, cs, sc); get State is depricated
+        return getServiceStatus(formatType, cs, sc);
     }
     
     /**
