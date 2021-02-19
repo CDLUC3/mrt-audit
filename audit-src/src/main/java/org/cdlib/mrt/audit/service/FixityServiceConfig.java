@@ -523,7 +523,8 @@ public class FixityServiceConfig
     public FixityItemDB getNewDb()
         throws TException
     {
-        return new FixityItemDB(logger, setupProperties);
+        setFixityItemDB();
+        return db;
     }
 
     public void refresh()
