@@ -1,3 +1,4 @@
+
 /******************************************************************************
 Copyright (c) 2005-2012, Regents of the University of California
 All rights reserved.
@@ -64,25 +65,24 @@ public class FixityServiceStateManager
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
 
-    
-    protected File fixityInfo = null;
+    protected Properties serviceProperties = null;
     protected LoggerInf logger = null;
 
     public static FixityServiceStateManager getFixityServiceStateManager(
-            LoggerInf logger, File fixityInfo)
+            LoggerInf logger, Properties serviceProperties)
         throws TException
     {
-        return new FixityServiceStateManager(logger, fixityInfo);
+        return new FixityServiceStateManager(logger, serviceProperties);
     }
 
-    protected FixityServiceStateManager(LoggerInf logger, File fixityInfo)
+    protected FixityServiceStateManager(LoggerInf logger, Properties serviceProperties)
         throws TException
     {
         try {
             this.logger = logger;
-            this.fixityInfo = fixityInfo;
-            if (!fixityInfo.exists()) {
-                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "fixity-info.txt does not exist:");
+            this.serviceProperties = serviceProperties;
+            if ((serviceProperties == null) || (serviceProperties.size() == 0)) {
+                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "serviceProperties does not exist:");
             }
 
 
@@ -95,9 +95,6 @@ public class FixityServiceStateManager
         throws TException
     {
         try {
-            InputStream fis = new FileInputStream(fixityInfo);
-            Properties serviceProperties = new Properties();
-            serviceProperties.load(fis);
             FixityServiceState state = new FixityServiceState(serviceProperties);
             if (DEBUG) {
                 boolean dbRunning = false;
@@ -124,9 +121,6 @@ public class FixityServiceStateManager
         throws TException
     {
         try {
-            InputStream fis = new FileInputStream(fixityInfo);
-            Properties serviceProperties = new Properties();
-            serviceProperties.load(fis);
             FixityServiceState state = new FixityServiceState(serviceProperties);
             if (DEBUG) {
                 boolean dbRunning = false;
@@ -145,9 +139,6 @@ public class FixityServiceStateManager
         throws TException
     {
         try {
-            InputStream fis = new FileInputStream(fixityInfo);
-            Properties serviceProperties = new Properties();
-            serviceProperties.load(fis);
             addDates(connection, state);
             addCounts(connection, state);
 
@@ -302,24 +293,13 @@ public class FixityServiceStateManager
         TFrame tFrame = null;
         FixityItemDB db = null;
         try {
-            String propertyList[] = {
-                "resources/FixityTest.properties"};
-            tFrame = new TFrame(propertyList, "TestFixity");
-            Properties prop = tFrame.getProperties();
-            // Create an instance of this object
-            LoggerInf logger = new TFileLogger(NAME, 50, 50);
-            String pathkey = NAME+ ".infoPath";
-            String path  = prop.getProperty(NAME+ ".infoPath");
-            if (StringUtil.isEmpty(path)) {
-                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "missing parm:" + pathkey);
-            }
-            File fixityInfo = new File(path);
-            if (!fixityInfo.exists()) {
-                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "file does not exist:" + pathkey);
-            }
-            db = new FixityItemDB(logger, prop);
+            FixityServiceConfig fixityStateConfig = FixityServiceConfig.useYaml();
+            
+            LoggerInf logger = fixityStateConfig.getLogger();
+            db = fixityStateConfig.getDb();
+            Properties setup = fixityStateConfig.getSetupProperties();
             FixityServiceStateManager manager = getFixityServiceStateManager
-                    (logger, fixityInfo);
+                    (logger, setup);
             Connection connect = db.getConnection(true);
             FixityServiceState state = manager.getFixityServiceState(connect);
             

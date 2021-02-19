@@ -81,7 +81,7 @@ public class FixityMRTServiceTestOwn
 
         TFrame tFrame = null;
         FixityItemDB db = null;
-        FixityServiceProperties fixityServiceProperties = null;
+        FixityServiceConfig fixityServiceProperties = null;
         FixityEntriesState entries = null;
         try {
             String propertyList[] = {
@@ -90,7 +90,7 @@ public class FixityMRTServiceTestOwn
             Properties prop = tFrame.getProperties();
             System.out.println(PropertiesUtil.dumpProperties("FixityMrtServiceTestOwn", prop));
             fixityServiceProperties
-                    = FixityServiceProperties.getFixityServiceProperties(prop);
+                    = FixityServiceConfig.useYaml();
             FixityMRTService service = FixityMRTService.getFixityService(fixityServiceProperties);
             StateInf state = service.getFixityServiceState();
             LoggerInf logger = fixityServiceProperties.getLogger();

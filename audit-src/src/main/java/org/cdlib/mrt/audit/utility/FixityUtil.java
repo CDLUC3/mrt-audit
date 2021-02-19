@@ -45,8 +45,7 @@ import org.apache.http.StatusLine;
 
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
-import static org.cdlib.mrt.audit.handler.FixityHandlerMRTStore.normalizeQuery;
-import org.cdlib.mrt.audit.service.FixityServiceProperties;
+import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.s3.service.NodeIO;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FixityStatusType;
@@ -228,7 +227,7 @@ public class FixityUtil
             String NEARLINE = "near-line"; //<<<USE
             //String NEARLINE = "on-line"; // <<< REMOVE TEST
             if (DEBUG) System.out.println("NearLineTest entered:" + storageURLS);
-            NodeIO nodeIO = FixityServiceProperties.getNodeIO();
+            NodeIO nodeIO = getNodeIO();
             if (nodeIO == null) {
                 System.out.println("NodeIO not found");
                 return null;
@@ -337,7 +336,7 @@ public class FixityUtil
     {
         InputStream inputStream = null;
         Exception runex = null;
-        NodeIO nodeIO = FixityServiceProperties.getNodeIO();
+        NodeIO nodeIO = getNodeIO();
         if (nodeIO != null) {
             for (int retry=0; retry < 3; retry++) {
                 try {
@@ -383,7 +382,7 @@ public class FixityUtil
         throws Exception
     {
         InputStream inputStream = null;
-        NodeIO nodeIO = FixityServiceProperties.getNodeIO();
+        NodeIO nodeIO = getNodeIO();
         if (nodeIO != null) {
             for (int retry=0; retry < 3; retry++) {
                 try {
@@ -418,6 +417,12 @@ public class FixityUtil
             }
         }
         return inputStream;
+    }
+    
+    public static NodeIO getNodeIO()
+        throws TException
+    {
+        return FixityServiceConfig.getNodeIO();
     }
 
     public static String removeEsc(String urlS)
@@ -551,6 +556,8 @@ public class FixityUtil
             }
 
         } catch (Exception ex) {
+            System.out.print("****>>>");
+            ex.printStackTrace();
             if (DEBUG) {
                 System.out.println("processStorageFixity exception:" + ex);
                 ex.printStackTrace();

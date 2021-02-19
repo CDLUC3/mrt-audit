@@ -86,7 +86,6 @@ public class RunFixity implements Runnable
     protected FixityItemDB db = null;
     protected long maxout = 100000000;
     protected Exception exception = null;
-    protected RewriteEntry rewriteEntry = null;
     protected String auditQualify = "";
 
 
@@ -107,16 +106,14 @@ public class RunFixity implements Runnable
      */
     public RunFixity(
             FixityState fixityState,
-            RewriteEntry rewriteEntry,
             FixityItemDB db,
             LoggerInf logger)
         throws TException
     {
         this.fixityState = fixityState;
-        this.rewriteEntry = rewriteEntry;
         this.logger = logger;
         this.db = db;
-        this.capacity = fixityState.getCapacity();
+        this.capacity = fixityState.getQueueCapacity();
         this.queue = new LinkedList<InvAudit>();
         setAuditQualify();
     }
@@ -209,7 +206,7 @@ public class RunFixity implements Runnable
             LoggerInf logger = new TFileLogger(NAME, 50, 50);
             FixityState fixityState = new FixityState();
             db = new FixityItemDB(logger, tFrame.getProperties());
-            RunFixity test = new RunFixity(fixityState, null, db, logger);
+            RunFixity test = new RunFixity(fixityState, db, logger);
             //test.run();
             ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
             threadExecutor.execute( test ); // start task1
@@ -447,9 +444,6 @@ public class RunFixity implements Runnable
                 return null;
             }
             InvAudit audit = queue.pop();
-            if (rewriteEntry != null) {
-                rewriteEntry.map(audit);
-            }
             return audit;
 
         } catch (Exception ex) {

@@ -66,25 +66,25 @@ public class FixityState
     private static final boolean DEBUG = true;
     protected volatile boolean runFixity = false;
     protected volatile boolean fixityProcessing = false;
-    protected volatile int capacity = 100;
+    protected volatile int queueCapacity = 100;
     protected volatile int threadPool = 4;
     protected volatile long interval = 0;
     protected volatile long queueSleep = 0;
-    protected File fixityInfo = null;
     protected AtomicLong cnt = new AtomicLong();
     protected Properties serviceProperties = null;
     protected long periodicReportFrequency = -1;
     protected String periodicReportFormat = null;
+    protected String periodicReportTo = null;
     protected String notification = null;
     protected String supportURI = null;
     protected String auditQualify = null;
 
     public FixityState() { }
 
-    public FixityState(File fixityInfo)
+    public FixityState(Properties serviceProperties)
         throws TException
     {
-        this.fixityInfo = fixityInfo;
+        this.serviceProperties = serviceProperties;
         set();
     }
 
@@ -92,22 +92,15 @@ public class FixityState
         throws TException
     {
         try {
-            if (!fixityInfo.exists()) {
-                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "fixity-info.txt does not exist:");
-            }
-            InputStream fis = new FileInputStream(fixityInfo);
-            serviceProperties = new Properties();
-            serviceProperties.load(fis);
             FixityServiceState state = new FixityServiceState(serviceProperties);
             setIntervalDays(state.getIntervalDays());
             setThreadPool(state.getThreadPool());
             setQueueSleepMs(state.getQueueSleepMs());
-            setNotification(state.getNotification());
             setPeriodicReportFormat(state.getPeriodicReportFormat());
-            setSupportURI(state.getSupportURI());
             setPeriodicReportFrequencyHours(state.getPeriodicReportFrequencyHours());
+            setPeriodicReportTo(state.getPeriodicReportTo());
             setAuditQualify(state.getAuditQualify());
-            setCapacity(state.getCapacity());
+            setQueueCapacity(state.getQueueCapacity());
     
     
         } catch (Exception ex) {
@@ -131,12 +124,12 @@ public class FixityState
         this.fixityProcessing = fixityProcessing;
     }
 
-    public int getCapacity() {
-        return capacity;
+    public int getQueueCapacity() {
+        return queueCapacity;
     }
 
-    public synchronized void setCapacity(int capacity) {
-        this.capacity = capacity;
+    public synchronized void setQueueCapacity(int queueCapacity) {
+        this.queueCapacity = queueCapacity;
     }
 
     public long getIntervalDays() {
@@ -181,12 +174,20 @@ public class FixityState
         return serviceProperties;
     }
 
-    public String getNotification() {
-        return notification;
+    public long getPeriodicReportFrequency() {
+        return periodicReportFrequency;
     }
 
-    public void setNotification(String notification) {
-        this.notification = notification;
+    public void setPeriodicReportFrequency(long periodicReportFrequency) {
+        this.periodicReportFrequency = periodicReportFrequency;
+    }
+
+    public String getPeriodicReportTo() {
+        return periodicReportTo;
+    }
+
+    public void setPeriodicReportTo(String periodicReportTo) {
+        this.periodicReportTo = periodicReportTo;
     }
 
     public String getPeriodicReportFormat() {
@@ -229,7 +230,6 @@ public class FixityState
         String msg = ""
                 + " - runFixity=" + runFixity + NL
                 + " - fixityProcessing=" + fixityProcessing + NL
-                + " - capacity=" + capacity + NL
                 + " - threadPool=" + threadPool + NL
                 + " - interval=" + interval + NL
                 + " - queueSleep=" + queueSleep + NL

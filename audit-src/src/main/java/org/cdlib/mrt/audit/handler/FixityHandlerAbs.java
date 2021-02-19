@@ -59,22 +59,7 @@ public abstract class FixityHandlerAbs
     public static FixityHandler getFixityHandler(FixityMRTEntry entry, LoggerInf logger)
         throws TException
     {
-        FixityMRTEntry.SourceType methodType = entry.retrieveMapSource();
-        if (methodType == null) methodType = entry.getSource();
-        if (methodType == null) {
-            throw new TException.REQUEST_INVALID("Source element required for this process");
-        }
-        switch (methodType) {
-            case web: //THIS IS USED BY AUDIT
-                log(logger, "retrun STANDARD Fixity Handler");
-                return getStandardHandler(entry, logger);
-            case merritt:
-                log(logger, "retrun MRTStore Fixity Handler");
-                return getMRTStoreHandler(entry, logger);
-            default:
-                throw new TException.INVALID_OR_MISSING_PARM(
-                        "getFixityHandler methodType not supported");
-        }
+        return getStandardHandler(entry, logger);
     }
 
     public static FixityHandlerStandard getStandardHandler(
@@ -83,14 +68,6 @@ public abstract class FixityHandlerAbs
         throws TException
     {
         return new FixityHandlerStandard(entry, logger);
-    }
-
-    public static FixityHandlerMRTStore getMRTStoreHandler(
-            FixityMRTEntry entry,
-            LoggerInf logger)
-        throws TException
-    {
-        return new FixityHandlerMRTStore(entry, logger);
     }
 
 

@@ -37,7 +37,7 @@ import org.cdlib.mrt.audit.db.FixityItemDB;
 
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.db.InvAudit;
-import org.cdlib.mrt.audit.service.FixityServiceProperties;
+import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import static org.cdlib.mrt.audit.utility.FixityDBUtil.getMRTEntry;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -121,20 +121,20 @@ public class FixityActionAbs
     }
 
     public static FixityCleanup getFixityCleanup(
-            FixityServiceProperties fixityServiceProperties,
+            FixityServiceConfig fixityServiceConfig,
             LoggerInf logger)
         throws TException
     {
-        return new FixityCleanup(fixityServiceProperties, logger);
+        return new FixityCleanup(fixityServiceConfig, logger);
 
     }
 
     public static PeriodicServiceReport getPeriodicServiceReport(
-            FixityServiceProperties fixityServiceProperties,
+            FixityServiceConfig fixityServiceConfig,
             LoggerInf logger)
         throws TException
     {
-        return new PeriodicServiceReport(fixityServiceProperties, logger);
+        return new PeriodicServiceReport(fixityServiceConfig, logger);
 
     }
     

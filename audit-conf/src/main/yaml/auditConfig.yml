@@ -1,0 +1,93 @@
+which-audit-info: "{!ENV: MERRITT_AUDIT_INFO !DEFAULT: audit-info}"
+  
+audit-info:
+  service:
+    threadPool: "{!SSM: audit/config/threadPool !DEFAULT: 5}"
+    nodePath: "{!SSM: audit/config/nodePath  !DEFAULT: yaml:}"
+    auditQualify: "{!SSM: audit/config/auditQualify !DEFAULT: NONE}"
+    intervalDays: "{!SSM: audit/config/intervalDays !DEFAULT: 0}"
+    queueSleepMs: "{!SSM: audit/config/queueSleepMs !DEFAULT: 0}"
+    queueCapacity: "{!SSM: audit/config/queueCapacity !DEFAULT: 100}"
+    
+  state:
+    id: audit
+    name: UC3
+    description: "UC3 audit micro-service"
+    version: "audit version"
+    serviceScheme: "Fixity/0.2/1.0"
+
+  fileLogger:
+    messageMaximumLevel: "{!SSM: audit/config/log/messageMaximumLevel !DEFAULT: 5}"
+    messageMaximumError: "{!SSM: audit/config/log/messageMaximumError !DEFAULT: 10}"
+    path: "{!ENV: LOG_AUDIT}"
+    name: audit
+    qualifier: yyMMdd
+    trace: 5
+    
+  mail:
+    smtp: "{!SSM: audit/config/mail/smtp !DEFAULT: localhost}"
+    from: "{!SSM: audit/config/mail/from !DEFAULT: uc3staff@ucop.edu}"
+    
+  cleanup:
+    subject: "{!SSM: audit/config/cleanup/subject !DEFAULT: NONE}"
+    to: "{!SSM: audit/config/cleanup/to !DEFAULT: NONE}"
+    msg: "{!SSM: audit/config/cleanup/msg !DEFAULT: NONE}"
+    
+  db:
+    user: "{!SSM: inv/readwrite/db-user}"
+    password: "{!SSM: inv/readwrite/db-password}"
+    host: "{!SSM: inv/db-host}"
+    name: "{!SSM: inv/db-name}"
+    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
+
+audit-info-docker: &docker    
+  service:
+    threadPool: "5"
+    nodePath: "yaml:"
+    auditQualify: "NONE"
+    intervalDays: "0"
+    queueSleepMs: "0"
+    queueCapacity: "100"
+    
+  state:
+    id: audit
+    name: UC3
+    description: "UC3 audit micro-service"
+    version: "audit version"
+    serviceScheme: "Fixity/0.2/1.0"
+    
+  cleanup:
+    subject: "Merritt Audit Cleanup"
+    from: "uc3staff@ucop.edu"
+    to: "NONE"
+    msg: "Merritt Audit Cleanup Stage"
+
+  fileLogger:
+    messageMaximumLevel: 5
+    messageMaximumError: 10
+    path: /tdr/tmpdir
+    name: audit
+    qualifier: yyMMdd
+    trace: 5
+    
+  mail:
+    smtp: "smtp.ucop.edu"
+    from: "uc3staff@ucop.edu"
+
+  db:
+    adapter: mysql2
+    host: db-container
+    database: db-name
+    user: user
+    password: password
+    encoding: utf8   # schema won't load if it's utf8mb4
+
+inv-info-docker-dev: 
+  <<: *docker
+
+  db:
+    user: "{!SSM: inv/readwrite/db-user}"
+    password: "{!SSM: inv/readwrite/db-password}"
+    host: "{!SSM: inv/db-host}"
+    name: "{!SSM: inv/db-name}"
+    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"

@@ -23,7 +23,7 @@
   </profiles>
 
     <modules>
-        <module>${confModule}</module>
+        <module>audit-conf</module>
         <module>audit-src</module>
         <module>audit-war</module>
     </modules>
