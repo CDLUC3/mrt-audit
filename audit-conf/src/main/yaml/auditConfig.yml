@@ -22,7 +22,6 @@ audit-info:
     path: "{!ENV: LOG_AUDIT}"
     name: audit
     qualifier: yyMMdd
-    trace: 5
     
   mail:
     smtp: "{!SSM: audit/config/mail/smtp !DEFAULT: localhost}"
@@ -68,7 +67,6 @@ audit-info-docker: &docker
     path: /tdr/tmpdir
     name: audit
     qualifier: yyMMdd
-    trace: 5
     
   mail:
     smtp: "smtp.ucop.edu"

@@ -290,8 +290,7 @@ public class FixityServiceConfig
         logprop.setProperty("fileLogger.message.maximumLevel", "" + fileLogger.getInt("messageMaximumLevel"));
         logprop.setProperty("fileLogger.error.maximumLevel", "" + fileLogger.getInt("messageMaximumError"));
         logprop.setProperty("fileLogger.name", name);
-        logprop.setProperty("fileLogger.trace", "" + fileLogger.getInt("trace"));
-        logprop.setProperty("fileLogger.qualifier", fileLogger.getString("qualifier"));
+        logprop.setProperty("fileLogger.qualifier", qualifier);
         if (StringUtil.isEmpty(path)) {
             throw new TException.INVALID_OR_MISSING_PARM(
                     MESSAGE + "setCANLog: path not supplied");
