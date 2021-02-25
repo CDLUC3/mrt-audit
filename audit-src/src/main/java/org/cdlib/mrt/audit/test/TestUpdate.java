@@ -82,7 +82,7 @@ public class TestUpdate
 
         TFrame tFrame = null;
         FixityItemDB db = null;
-        FixityServiceProperties fixityServiceProperties = null;
+        FixityServiceConfig fixityServiceProperties = null;
         FixityEntriesState entries = null;
         
         Connection connection = null;
@@ -92,7 +92,7 @@ public class TestUpdate
             tFrame = new TFrame(propertyList, "TestFixity");
             Properties prop = tFrame.getProperties();
             fixityServiceProperties
-                    = FixityServiceProperties.getFixityServiceProperties(prop);
+                    = FixityServiceConfig.useYaml();
             //FixityMRTService service = FixityMRTService.getFixityService(fixityServiceProperties);
             //StateInf state = service.getFixityServiceState();
             LoggerInf logger = fixityServiceProperties.getLogger();

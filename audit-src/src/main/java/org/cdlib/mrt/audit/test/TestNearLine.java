@@ -84,7 +84,7 @@ public class TestNearLine
 
         TFrame tFrame = null;
         FixityItemDB db = null;
-        FixityServiceProperties fixityServiceProperties = null;
+        FixityServiceConfig fixityServiceProperties = null;
         FixityEntriesState entries = null;
         
         Connection connection = null;
@@ -95,10 +95,10 @@ public class TestNearLine
             Properties prop = tFrame.getProperties();
             System.out.println(PropertiesUtil.dumpProperties("TestNearLine.properties", prop));
             fixityServiceProperties
-                    = FixityServiceProperties.getFixityServiceProperties(prop);
+                    = FixityServiceConfig.useYaml();
             //FixityMRTService service = FixityMRTService.getFixityService(fixityServiceProperties);
             //StateInf state = service.getFixityServiceState();
-            LoggerInf logger = LoggerAbs.getTFileLogger("testFormatter", 10, 10);
+            LoggerInf logger = fixityServiceProperties.getLogger();
             //LoggerInf logger = fixityServiceProperties.getLogger();
             
             //String format = formatIt(logger, state);

@@ -77,32 +77,19 @@ public class FixityMRTService
     private static final boolean THREADDEBUG = false;
     protected LoggerInf logger = null;
     protected Exception exception = null;
-    protected FixityServiceProperties fixityServiceProperties = null;
+    protected FixityServiceConfig fixityServiceConfig = null;
 
-    public static FixityMRTService getFixityService(FixityServiceProperties fixityServiceProperties)
+    public static FixityMRTService getFixityService(FixityServiceConfig fixityServiceConfig)
             throws TException
     {
-        return new FixityMRTService(fixityServiceProperties);
+        return new FixityMRTService(fixityServiceConfig);
     }
 
-    public static FixityMRTService getFixityService(Properties prop)
-            throws TException
-    {
-        return new FixityMRTService(prop);
-    }
-
-    protected FixityMRTService(FixityServiceProperties fixityServiceProperties)
+    protected FixityMRTService(FixityServiceConfig fixityServiceConfig)
         throws TException
     {
-        this.fixityServiceProperties = fixityServiceProperties;
-        this.logger = fixityServiceProperties.getLogger();
-    }
-
-    protected FixityMRTService(Properties prop)
-        throws TException
-    {
-        this.fixityServiceProperties = new FixityServiceProperties(prop);
-        this.logger = fixityServiceProperties.getLogger();
+        this.fixityServiceConfig = fixityServiceConfig;
+        this.logger = fixityServiceConfig.getLogger();
     }
 
     @Override
@@ -110,7 +97,7 @@ public class FixityMRTService
         throws TException
     {
         if (THREADDEBUG) FixityUtil.sysoutThreads("Begin getFixityServiceState");
-        FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceState();
+        FixityServiceState fixityServiceState = fixityServiceConfig.getFixityServiceState();
         setProcessCount(fixityServiceState);
         if (THREADDEBUG) FixityUtil.sysoutThreads("End getFixityServiceState");
         return fixityServiceState;
@@ -121,7 +108,7 @@ public class FixityMRTService
         throws TException
     {
         if (THREADDEBUG) FixityUtil.sysoutThreads("Begin getFixityServiceStatus");
-        FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceStatus();
+        FixityServiceState fixityServiceState = fixityServiceConfig.getFixityServiceStatus();
         if (THREADDEBUG) FixityUtil.sysoutThreads("End getFixityServiceStatus");
         return fixityServiceState;
     }
@@ -130,10 +117,10 @@ public class FixityMRTService
     public FixityEntriesState getFixityEntry(String urlS)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
-        Connection connection = fixityServiceProperties.getConnection(true);
+        Connection connection = fixityServiceConfig.getConnection(true);
         FixityMRTEntry[] entries = FixityDBUtil.getItemEntries(connection,urlS, logger);
         if (DEBUG) System.out.println("getFixityEntry.length=" + entries.length);
         if (entries == null) return null;
@@ -145,10 +132,10 @@ public class FixityMRTService
         throws TException
     {
         
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
-        Connection connection = fixityServiceProperties.getConnection(true);
+        Connection connection = fixityServiceConfig.getConnection(true);
         SearchFixityEntries searchEntries = FixityActionAbs.getSearchFixityEntries(audit, connection, logger);
         FixityMRTEntry[] entries = searchEntries.call();
         if (entries == null) {
@@ -161,10 +148,10 @@ public class FixityMRTService
     public FixityMRTEntry queue(InvAudit audit)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
-        Connection connection = fixityServiceProperties.getConnection(false);
+        Connection connection = fixityServiceConfig.getConnection(false);
         ProcessFixityEntry queue = ProcessFixityEntry.getProcessFixityEntry("queue", audit, connection, logger);
         FixityMRTEntry responseEntry = queue.call();
         if (queue.getException() != null) {
@@ -189,10 +176,10 @@ public class FixityMRTService
     public FixityMRTEntry update(InvAudit audit)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
-        Connection connection = fixityServiceProperties.getConnection(false);
+        Connection connection = fixityServiceConfig.getConnection(false);
         ProcessFixityEntry update = ProcessFixityEntry.getProcessFixityEntry("update", audit, connection, logger);
         FixityMRTEntry responseEntry = update.call();
         if (update.getException() != null) {
@@ -206,16 +193,16 @@ public class FixityMRTService
         throws TException
     {
         
-        LoggerInf localLog = fixityServiceProperties.getLogger();
+        LoggerInf localLog = fixityServiceConfig.getLogger();
         if (localLog == null) {
             throw new TException.GENERAL_EXCEPTION("update: null log");
         }
-        Connection connection = fixityServiceProperties.getConnection(false);
+        Connection connection = fixityServiceConfig.getConnection(false);
         InvAudit audit = FixityDBUtil.getAudit(connection, id, localLog);
         if (audit == null) {
             throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "update item not found:" + id);
         }
-        RewriteEntry rewriteEntry = fixityServiceProperties.getRewriteEntry();
+        RewriteEntry rewriteEntry = fixityServiceConfig.getRewriteEntry();
         if (rewriteEntry != null) {
             rewriteEntry.map(audit);
         }
@@ -228,10 +215,10 @@ public class FixityMRTService
     }
 
     @Override
-    public FixitySubmittedState getSelectReport(String select, String email, String formatType)
+    public FixitySubmittedState getSelectReport(String select, String emailTo, String emailMsg, String formatType)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
         try {
@@ -240,11 +227,11 @@ public class FixityMRTService
             FixityEmailWrapper sqlReportWrapper = new FixityEmailWrapper(
                 report,
                 true,
-                "test test test",
-                email,
+                emailMsg,
+                emailTo,
                 formatType,
-                fixityServiceProperties.getDb(),
-                fixityServiceProperties.getSetupProperties(),
+                fixityServiceConfig.getDb(),
+                fixityServiceConfig.getSetupProperties(),
                 logger);
             ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
             threadExecutor.execute( sqlReportWrapper ); // start task1
@@ -263,13 +250,13 @@ public class FixityMRTService
     public FixitySubmittedState doCleanup(String formatType)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
         FixityItemDB db = null;
         try {
-            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceProperties, logger);
-            db = fixityServiceProperties.getDb();
+            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceConfig, logger);
+            db = fixityServiceConfig.getDb();
             FixityEmailWrapper cleanupWrapper = new FixityEmailWrapper(
                 fix,
                 true,
@@ -279,7 +266,42 @@ public class FixityMRTService
                 fix.getEmailMsg(),
                 "xml",
                 db,
-                fixityServiceProperties.getSetupProperties(),
+                fixityServiceConfig.getSetupProperties(),
+                logger);
+            ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
+            threadExecutor.execute(cleanupWrapper ); // start task1
+            threadExecutor.shutdown();
+            Thread.sleep(3000);
+            FixitySubmittedState retState = new FixitySubmittedState(true);
+            return retState;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new TException(ex);
+        }
+    }
+
+    @Override
+    public FixitySubmittedState doPeriodicReport(String formatType)
+        throws TException
+    {
+        if (fixityServiceConfig.isShutdown()) {
+            throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
+        }
+        FixityItemDB db = null;
+        try {
+            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceConfig, logger);
+            db = fixityServiceConfig.getDb();
+            FixityEmailWrapper cleanupWrapper = new FixityEmailWrapper(
+                fix,
+                true,
+                fix.getEmailTo(),
+                fix.getEmailFrom(),
+                fix.getEmailSubject(),
+                fix.getEmailMsg(),
+                "xml",
+                db,
+                fixityServiceConfig.getSetupProperties(),
                 logger);
             ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
             threadExecutor.execute(cleanupWrapper ); // start task1
@@ -298,7 +320,7 @@ public class FixityMRTService
     public FixitySubmittedState getEntryReport(InvAudit audit, String email, String formatType)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
         try {
@@ -310,8 +332,8 @@ public class FixityMRTService
                 "Fixity Entry Report",
                 email,
                 formatType,
-                fixityServiceProperties.getDb(),
-                fixityServiceProperties.getSetupProperties(),
+                fixityServiceConfig.getDb(),
+                fixityServiceConfig.getSetupProperties(),
                 logger);
             ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
             threadExecutor.execute( emailWrapper ); // start task1
@@ -334,7 +356,7 @@ public class FixityMRTService
             String formatTypeS)
         throws TException
     {
-        if (fixityServiceProperties.isShutdown()) {
+        if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
         try {
@@ -356,8 +378,8 @@ public class FixityMRTService
                 "Fixity Item Report",
                 msg,
                 formatTypeS,
-                fixityServiceProperties.getDb(),
-                fixityServiceProperties.getSetupProperties(),
+                fixityServiceConfig.getDb(),
+                fixityServiceConfig.getSetupProperties(),
                 logger);
 
             ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
@@ -378,29 +400,27 @@ public class FixityMRTService
         throws TException
     {
         if (THREADDEBUG) FixityUtil.sysoutThreads("Begin setFixityRun");
-        fixityServiceProperties.setShutdown(false);
-        fixityServiceProperties.dbStartup();
+        fixityServiceConfig.setShutdown(false);
+        fixityServiceConfig.dbStartup();
         FixityState fixityState = null;
-        RewriteEntry rewriteEntry = null;
         try {
-            fixityServiceProperties.refresh();
-            rewriteEntry = fixityServiceProperties.getRewriteEntry();
-            fixityState = fixityServiceProperties.getFixityState();
+            fixityServiceConfig.refresh();
+            fixityState = fixityServiceConfig.getFixityState();
             if (fixityState.isFixityProcessing()) {
                 if (!fixityState.isRunFixity()) {
                     fixityState.setRunFixity(true);
                 }
             }
             if (!fixityState.isFixityProcessing()) {
-                RunFixity runFixity = new RunFixity(fixityState, rewriteEntry, fixityServiceProperties.getDb(), logger);
+                RunFixity runFixity = new RunFixity(fixityState, fixityServiceConfig.getDb(), logger);
                 ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
                 threadExecutor.execute( runFixity ); // start task1
                 threadExecutor.shutdown();
                 Thread.sleep(3000);
             }
-            FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceStatus();
+            FixityServiceState fixityServiceState = fixityServiceConfig.getFixityServiceStatus();
             setProcessCount(fixityServiceState);
-            //fixityServiceProperties.startPeriodicReport();
+            //fixityServiceConfig.startPeriodicReport();
             if (THREADDEBUG) FixityUtil.sysoutThreads("End setFixityRun");
             return fixityServiceState;
 
@@ -417,11 +437,11 @@ public class FixityMRTService
         if (THREADDEBUG) FixityUtil.sysoutThreads("Begin setFixityStop");
         FixityState fixityState = null;
         try {
-            fixityState = fixityServiceProperties.getFixityState();
+            fixityState = fixityServiceConfig.getFixityState();
             if (fixityState.isFixityProcessing() && fixityState.isRunFixity()) {
                 fixityState.setRunFixity(false);
             }
-            FixityServiceState fixityServiceState = fixityServiceProperties.getFixityServiceStatus();
+            FixityServiceState fixityServiceState = fixityServiceConfig.getFixityServiceStatus();
             setProcessCount(fixityServiceState);
             if (THREADDEBUG) FixityUtil.sysoutThreads("End setFixityStop");
             return fixityServiceState;
@@ -436,9 +456,9 @@ public class FixityMRTService
         throws TException
     {
         if (THREADDEBUG) FixityUtil.sysoutThreads("Begin setShutdown");
-        fixityServiceProperties.setShutdown(true);
-        //fixityServiceProperties.shutdownPeriodicReport();
-        fixityServiceProperties.dbShutDown();
+        fixityServiceConfig.setShutdown(true);
+        //fixityServiceConfig.shutdownPeriodicReport();
+        fixityServiceConfig.dbShutDown();
         if (THREADDEBUG) FixityUtil.sysoutThreads("End setShutdown");
         return setFixityStop();
     }
@@ -448,12 +468,12 @@ public class FixityMRTService
         throws TException
     {
         setFixityRun();
-        fixityServiceProperties.setShutdown(false);
+        fixityServiceConfig.setShutdown(false);
     }
     
     protected void setProcessCount(FixityServiceState fixityServiceState)
     {
-        FixityState state = fixityServiceProperties.getFixityState();
+        FixityState state = fixityServiceConfig.getFixityState();
         fixityServiceState.setProcessCount(state.getCnt());
     }
     protected void log(String msg)
@@ -466,20 +486,15 @@ public class FixityMRTService
     public static void main(String args[])
     {
 
-        TFrame tFrame = null;
         FixityItemDB db = null;
-        FixityServiceProperties fixityServiceProperties = null;
+        FixityServiceConfig fixityServiceConfig = null;
         FixityEntriesState entries = null;
         try {
-            String propertyList[] = {
-                "resources/Fixity.properties"};
-            tFrame = new TFrame(propertyList, "TestFixity");
-            Properties prop = tFrame.getProperties();
-            fixityServiceProperties
-                    = FixityServiceProperties.getFixityServiceProperties(prop);
-            FixityMRTService service = new FixityMRTService(fixityServiceProperties);
+            fixityServiceConfig
+                    = FixityServiceConfig.useYaml();
+            FixityMRTService service = new FixityMRTService(fixityServiceConfig);
             StateInf state = service.getFixityServiceState();
-            LoggerInf logger = fixityServiceProperties.getLogger();
+            LoggerInf logger = fixityServiceConfig.getLogger();
             
             String format = formatIt(logger, state);
             System.out.println("Initial Service State:" + NL + format);
@@ -561,7 +576,7 @@ if (true) return;
                         StringUtil.stackTrace(e));
         } finally {
             try {
-                fixityServiceProperties.dbShutDown();
+                fixityServiceConfig.dbShutDown();
             } catch (Exception ex) { }
         }
     }
@@ -591,8 +606,9 @@ if (true) return;
     }
 
     protected String getServiceMailto(String key, String defaultValue)
+        throws TException
     {
-        Properties serviceProperties = fixityServiceProperties.getServiceProperties();
+        Properties serviceProperties = fixityServiceConfig.getSetupProperties();
         if (serviceProperties == null) return defaultValue;
         String value = serviceProperties.getProperty(key);
         if (StringUtil.isEmpty(value)) return defaultValue;

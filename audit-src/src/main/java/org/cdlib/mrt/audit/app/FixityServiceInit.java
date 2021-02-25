@@ -37,21 +37,20 @@ import javax.servlet.ServletContext;
 
 import org.cdlib.mrt.audit.service.FixityMRTService;
 import org.cdlib.mrt.audit.service.FixityMRTServiceInf;
-import org.cdlib.mrt.audit.service.FixityServiceProperties;
+import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.utility.TException;
 /**
  * Initialize handling for storage service in servlet
  * @author dloy
  */
 public class FixityServiceInit
-        extends TFrameInit
 {
     private static final String serviceName = "fixityService";
 
     private enum Type {
         Regular, Default
     }
-    protected volatile FixityServiceProperties fixityServiceProperties = null;
+    protected volatile FixityServiceConfig fixityServiceConfig = null;
 
     /**
      * Get resolved storage service
@@ -60,7 +59,7 @@ public class FixityServiceInit
     public FixityMRTServiceInf getFixityService()
         throws TException
     {
-        return FixityMRTService.getFixityService(fixityServiceProperties);
+        return FixityMRTService.getFixityService(fixityServiceConfig);
     }
 
     /**
@@ -112,14 +111,13 @@ public class FixityServiceInit
     protected FixityServiceInit(Type type, ServletConfig servletConfig, String serviceName)
             throws TException
     {
-        super(servletConfig, serviceName);
         if (type == Type.Regular) {
-            fixityServiceProperties =
-                    FixityServiceProperties.getFixityServiceProperties(tFrame.getProperties());
+            fixityServiceConfig =
+                    FixityServiceConfig.useYaml();
         }
         if (type == Type.Default) {
-            fixityServiceProperties =
-                    FixityServiceProperties.getFixityServiceProperties(tFrame.getProperties());
+            fixityServiceConfig =
+                    FixityServiceConfig.useYaml();
         }
     }
 }

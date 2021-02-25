@@ -84,7 +84,7 @@ public class TestFromIdsStage
 
         TFrame tFrame = null;
         FixityItemDB db = null;
-        FixityServiceProperties fixityServiceProperties = null;
+        FixityServiceConfig fixityServiceProperties = null;
         FixityEntriesState entries = null;
         
         Connection connection = null;
@@ -95,12 +95,8 @@ public class TestFromIdsStage
             Properties prop = tFrame.getProperties();
             System.out.println(PropertiesUtil.dumpProperties("TestNearLine.properties", prop));
             fixityServiceProperties
-                    = FixityServiceProperties.getFixityServiceProperties(prop);
-            File fixityService = fixityServiceProperties.getFixityService();
-            File mapFile = new File(fixityService, "rewrite.txt");
-            //FixityMRTService service = FixityMRTService.getFixityService(fixityServiceProperties);
-            //StateInf state = service.getFixityServiceState();
-            LoggerInf logger = LoggerAbs.getTFileLogger("testFormatter", 10, 10);
+                    = FixityServiceConfig.useYaml();
+            LoggerInf logger = fixityServiceProperties.getLogger();
             //LoggerInf logger = fixityServiceProperties.getLogger();
             
 int [] ids = 
@@ -120,11 +116,10 @@ int [] ids =
             db = fixityServiceProperties.getDb();
             System.out.println("****TestUpdate*****");
             //state = service.setFixityRun();
-            RewriteEntry rewrite = new RewriteEntry(mapFile,logger);
             connection = db.getConnection(true);
             for (int id : ids) {
                 System.out.println("\n\n***ID==" + id);
-                FixityMRTEntry entry = doit(connection, rewrite, id, logger);
+                FixityMRTEntry entry = doit(connection, id, logger);
                 stats.add(entry);
             }
             connection.close();
@@ -151,7 +146,7 @@ int [] ids =
         }
     }
     
-    public static FixityMRTEntry  doit(Connection connection, RewriteEntry rewrite, long id, LoggerInf localLog)
+    public static FixityMRTEntry  doit(Connection connection, long id, LoggerInf localLog)
         throws Exception
     {
         InvAudit audit = FixityDBUtil.getAudit(connection, id, localLog);

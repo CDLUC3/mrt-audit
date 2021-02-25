@@ -39,7 +39,7 @@ import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.service.FixitySelectState;
 import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import org.cdlib.mrt.audit.db.InvAudit;
-import org.cdlib.mrt.audit.service.FixityServiceProperties;
+import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.audit.service.RewriteEntry;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FixityStatusType;
@@ -86,14 +86,14 @@ public class FixityCleanup
             ;
 
     protected Properties [] rows = null;
-    protected Properties setupProperties = null;protected String msg = null;
+    protected Properties cleanupProperties = null;
+    protected String msg = null;
     protected String emailFrom = null;
     protected String emailTo = null;
     protected String emailSubject = null;
     protected String emailMsg = null;
     protected String emailFormat = null;
     protected Integer testMax = null;
-    protected RewriteEntry rewrite = null;
     protected int processCnt = 0;
     
     protected FixityCleanup(
@@ -106,16 +106,13 @@ public class FixityCleanup
     }
     
     protected FixityCleanup(
-            FixityServiceProperties fixityServiceProperties,
+            FixityServiceConfig fixityServiceProperties,
             LoggerInf logger)
         throws TException
     {
         super(null, null, logger);
         this.db = fixityServiceProperties.getDb();
-        this.setupProperties = fixityServiceProperties.getSetupProperties();
-        File fixityService = fixityServiceProperties.getFixityService();
-        File mapFile = new File(fixityService, "rewrite.txt");
-        this.rewrite = new RewriteEntry(mapFile,logger);
+        this.cleanupProperties = fixityServiceProperties.getCleanupEmailProp();
         buildEmail();
     }
 
@@ -212,7 +209,6 @@ public class FixityCleanup
             //String mapUrl = mapAudit.getMapURL();
             //mrtEntry.setMapURL(mapUrl);
             audit.setProp(row);
-            audit = rewrite.map(audit);
             
             entryTest.auditid = audit.getId();
             if (DEBUG) System.out.println("***AUDITID=" + audit.getId()
@@ -362,9 +358,9 @@ public class FixityCleanup
     
     protected String getMail(String key, String def)
     {
-        if (setupProperties == null) return def;
+        if (cleanupProperties == null) return def;
         if (StringUtil.isAllBlank(key)) return null;
-        String value = setupProperties.getProperty(key);
+        String value = cleanupProperties.getProperty(key);
         if (value == null) value = def;
         return value;
     }

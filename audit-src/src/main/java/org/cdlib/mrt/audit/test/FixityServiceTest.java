@@ -80,7 +80,7 @@ public class FixityServiceTest
 
         TFrame tFrame = null;
         FixityItemDB db = null;
-        FixityServiceProperties fixityServiceProperties = null;
+        FixityServiceConfig fixityServiceProperties = null;
         FixityEntriesState entries = null;
         /*
         try {

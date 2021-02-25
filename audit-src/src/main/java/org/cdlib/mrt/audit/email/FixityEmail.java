@@ -40,6 +40,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeMessage;
 import org.cdlib.mrt.formatter.FormatInfo;
+import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TException;
 
 /**
@@ -53,6 +54,7 @@ public final class FixityEmail
     protected Session session = null;
     public FixityEmail(Properties emailProp)
     {
+        System.out.println(PropertiesUtil.dumpProperties("###FixityEmail", emailProp));
         setSession(emailProp, true);
     }
 
@@ -60,7 +62,7 @@ public final class FixityEmail
     {
         try {
             Properties props = new Properties();
-            props.put("mail.smtp.host", "exchangemail.ad.ucop.edu");
+            props.put("mail.smtp.host", "smtp.ucop.edu");
             FixityEmail emailer = new FixityEmail(props);
             String[] to = {"dloy@ucop.edu"};
             emailer.sendEmail(

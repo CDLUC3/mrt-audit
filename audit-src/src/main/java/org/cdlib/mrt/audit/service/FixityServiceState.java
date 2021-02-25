@@ -55,7 +55,7 @@ public class FixityServiceState
     protected String version = null;
     protected long interval = 0;
     protected int threadPool = 1;
-    protected int capacity = 100;
+    protected int queueCapacity = 100;
     protected DateState lastIteration = null;
     protected Double elapsedTime = null;
     protected Long totalSize = null;
@@ -68,13 +68,13 @@ public class FixityServiceState
     protected DateState created = null;
     protected DateState lastModified = null;
     protected FixityScheme serviceScheme = null;
-    protected String baseURI = null;
-    protected String notification = null;
+    //protected String baseURI = null;
     protected String supportURI = null;
     protected Long processCount = null;
+    protected String periodicReportTo = null;
     protected long periodicReportFrequency = -1;
-    protected long queueSleep = 0;
     protected String periodicReportFormat = null;
+    protected long queueSleep = 0;
     protected String auditQualify = null;
 
     public FixityServiceState() { }
@@ -82,17 +82,6 @@ public class FixityServiceState
     public FixityServiceState(Properties prop)
     {
         setValues(prop);
-    }
-
-    /**
-     * @return base URL for Fixity Service
-     */
-    public String getBaseURI() {
-        return baseURI;
-    }
-
-    public void setBaseURI(String baseURI) {
-        this.baseURI = baseURI;
     }
 
     /**
@@ -188,16 +177,12 @@ public class FixityServiceState
         this.name = name;
     }
 
-    /**
-     * 
-     * @return Notification email addresses of people to be notified on reports
-     */
-    public String getNotification() {
-        return notification;
+    public String getPeriodicReportTo() {
+        return periodicReportTo;
     }
 
-    public void setNotification(String notification) {
-        this.notification = notification;
+    public void setPeriodicReportTo(String periodicReportTo) {
+        this.periodicReportTo = periodicReportTo;
     }
 
     /**
@@ -270,18 +255,6 @@ public class FixityServiceState
 
     /**
      * 
-     * @return email from address of reports
-     */
-    public String getSupportURI() {
-        return supportURI;
-    }
-
-    public void setSupportURI(String supportURI) {
-        this.supportURI = supportURI;
-    }
-
-    /**
-     * 
      * @return Number of concurrent executing threads
      */
     public int getThreadPool() {
@@ -332,20 +305,19 @@ public class FixityServiceState
     {
         setName(prop.getProperty("name"));
         setDescription(prop.getProperty("description"));
-        setIntervalDays(prop.getProperty("interval"));
+        //setIntervalDays(prop.getProperty("interval"));
         setIntervalDays(prop.getProperty("intervalDays"));
         setThreadPool(prop.getProperty("threadPool"));
         setServiceScheme(prop.getProperty("serviceScheme"));
-        setBaseURI(prop.getProperty("baseURI"));
-        setNotification(prop.getProperty("notificationEmail"));
-        setSupportURI(prop.getProperty("supportURI"));
+        //setBaseURI(prop.getProperty("baseURI"));
+        setPeriodicReportTo(prop.getProperty("periodicReportTo"));
+        //setSupportURI(prop.getProperty("supportURI"));
         setPeriodicReportFrequencyHours(prop.getProperty("periodicReportFrequency"));
         setPeriodicReportFrequencyHours(prop.getProperty("periodicReportFrequencyHours"));
         setPeriodicReportFormat(prop.getProperty("periodicReportFormat"));
-        setQueueSleep(prop.getProperty("queueSleep"));
         setQueueSleepMs(prop.getProperty("queueSleepMs"));
         setAuditQualify(prop.getProperty("auditQualify"));
-        setCapacity(prop.getProperty("capacity"));
+        setQueueCapacity(prop.getProperty("queueCapacity"));
     }
 
     /**
@@ -448,16 +420,17 @@ public class FixityServiceState
         this.auditQualify = auditQualify;
     }
 
-    public int getCapacity() {
-        return capacity;
+    public int getQueueCapacity() {
+        return queueCapacity;
     }
 
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
+    public void setQueueCapacity(int queueCapacity) {
+        this.queueCapacity = queueCapacity;
     }
+    
 
-    public void setCapacity(String capacityS) {
+    public void setQueueCapacity(String capacityS) {
         if (StringUtil.isAllBlank(capacityS)) return;
-        this.capacity = Integer.parseInt(capacityS);
+        this.queueCapacity = Integer.parseInt(capacityS);
     }
 }

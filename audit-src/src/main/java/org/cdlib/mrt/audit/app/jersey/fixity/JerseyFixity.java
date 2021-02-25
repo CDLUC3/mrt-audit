@@ -189,162 +189,13 @@ public class JerseyFixity
         return cleanupAudit(formatType, cs, sc);
     }  
     
-/*
-    
-    @PUT
-    @Path("service")
-    public Response callSetFixity(
-            @DefaultValue("") @QueryParam("S") String setType,
-            @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        if (StringUtil.isEmpty(setType)) {
-            throw new TException.REQUEST_INVALID("Set fixity status requires 'S' query element");
-        }
-        setType = setType.toLowerCase();
-        if (setType.equals("start")) {
-            return runFixity(formatType, cs, sc);
-            
-        } else if (setType.equals("stop")) {
-            return stopFixity(formatType, cs, sc);
-            
-        } else  {
-            throw new TException.REQUEST_ELEMENT_UNSUPPORTED("Set fixity state value not recognized:" + setType);
-        }
-    }
-    
-    @GET
-    @Path("report")
-    public Response callGetItemReport(
-            @DefaultValue("") @QueryParam("type") String typeS,
-            @DefaultValue("") @QueryParam("context") String context,
-            @DefaultValue("") @QueryParam("email") String email,
-            @DefaultValue("xhtml") @QueryParam("t") String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        if (DEBUG) System.out.println(MESSAGE + "callAdd entered"
-                    + " - type=" + typeS + NL
-                    + " - context=" + context + NL
-                    + " - email=" + email + NL
-                    );
-        return getItemReport(typeS, context, email, formatType, cs, sc);
-    }
-    
-    @POST
-    @Path("test")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response callTest(
-            @DefaultValue("") @FormDataParam("url") String url,
-            @DefaultValue("") @FormDataParam("source") String source,
-            @DefaultValue("") @FormDataParam("size") String sizeS,
-            @DefaultValue("") @FormDataParam("digest-type") String digestType,
-            @DefaultValue("") @FormDataParam("digest-value") String digestValue,
-            @DefaultValue("") @FormDataParam("note") String note,
-            @DefaultValue("xhtml") @FormDataParam("response-form") String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        if (DEBUG) System.out.println(MESSAGE + "callTest entered"
-                    + " - url=" + url + NL
-                    + " - source=" + source + NL
-                    + " - size=" + sizeS
-                    + " - digestType=" + digestType + NL
-                    + " - digestValue=" + digestValue + NL
-                    + " - note=" + note + NL
-                    + " - formatType=" + formatType + NL
-                    );
-        FixityMRTEntry entry = new FixityMRTEntry();
-        entry.setUrl(url);
-        entry.setSource(source);
-        entry.setSize(sizeS);
-        entry.setDigest(digestType, digestValue);
-        entry.setNote(note);
-        return test(entry, formatType, cs, sc);
-    }
-
-    @POST
-    @Path("queue")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response callQueue(
-            @DefaultValue("") @FormDataParam("url") String url,
-            @DefaultValue("") @FormDataParam("source") String source,
-            @DefaultValue("") @FormDataParam("size") String sizeS,
-            @DefaultValue("") @FormDataParam("digest-type") String digestType,
-            @DefaultValue("") @FormDataParam("digest-value") String digestValue,
-            @DefaultValue("") @FormDataParam("note") String note,
-            @DefaultValue("xhtml") @FormDataParam("response-form") String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        if (DEBUG) System.out.println(MESSAGE + "callQueue entered"
-                    + " - url=" + url + NL
-                    + " - source=" + source + NL
-                    + " - size=" + sizeS
-                    + " - digestType=" + digestType + NL
-                    + " - digestValue=" + digestValue + NL
-                    + " - note=" + note + NL
-                    + " - formatType=" + formatType + NL
-                    );
-        FixityMRTEntry entry = new FixityMRTEntry();
-        entry.setUrl(url);
-        entry.setSource(source);
-        entry.setSize(sizeS);
-        entry.setDigest(digestType, digestValue);
-        entry.setNote(note);
-        return queue(entry, formatType, cs, sc);
-    }
-
-    @POST
-    @Path("update")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response callUpdate(
-            @DefaultValue("") @FormDataParam("itemkey") String itemKeyS,
-            @DefaultValue("") @FormDataParam("url") String url,
-            @DefaultValue("") @FormDataParam("source") String source,
-            @DefaultValue("") @FormDataParam("size") String sizeS,
-            @DefaultValue("") @FormDataParam("digest-type") String digestType,
-            @DefaultValue("") @FormDataParam("digest-value") String digestValue,
-            @DefaultValue("") @FormDataParam("context") String context,
-            @DefaultValue("") @FormDataParam("note") String note,
-            @DefaultValue("xhtml") @FormDataParam("response-form") String formatType,
-            @Context CloseableService cs,
-            @Context ServletConfig sc)
-        throws TException
-    {
-        if (DEBUG) System.out.println(MESSAGE + "callTest entered"
-                    + " - itemKey=" + itemKeyS + NL
-                    + " - url=" + url + NL
-                    + " - source=" + source + NL
-                    + " - size=" + sizeS
-                    + " - digestType=" + digestType + NL
-                    + " - digestValue=" + digestValue + NL
-                    + " - context=" + context + NL
-                    + " - note=" + note + NL
-                    + " - formatType=" + formatType + NL
-                    );
-        FixityMRTEntry entry = new FixityMRTEntry();
-        entry.setItemKey(itemKeyS);
-        entry.setUrl(url);
-        entry.setSource(source);
-        entry.setSize(sizeS);
-        entry.setDigest(digestType, digestValue);
-        entry.setNote(note);
-        return update(entry, formatType, cs, sc);
-    }
-
-*/
     @POST
     @Path("report")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response callGetReport(
             @DefaultValue("") @FormDataParam("select") String select,
-            @DefaultValue("") @FormDataParam("email") String email,
+            @DefaultValue("") @FormDataParam("emailTo") String emailTo,
+            @DefaultValue("") @FormDataParam("emailMsg") String emailMsg,
             @DefaultValue("xhtml") @FormDataParam("response-form") String formatType,
             @Context CloseableService cs,
             @Context ServletConfig sc)
@@ -352,9 +203,10 @@ public class JerseyFixity
     {
         if (DEBUG) System.out.println(MESSAGE + "callAdd entered"
                     + " - select=" + select + NL
-                    + " - email=" + email + NL
+                    + " - emailTo=" + emailTo + NL
+                    + " - emailMsg=" + emailMsg + NL
                     );
-        return getSelectReport(select, email, formatType, cs, sc);
+        return getSelectReport(select, emailTo, emailMsg, formatType, cs, sc);
     }
 
 
@@ -541,7 +393,7 @@ public class JerseyFixity
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
-
+    
     /**
      * Stop fixity service
      * @param formatType user provided format type
@@ -804,7 +656,8 @@ public class JerseyFixity
 
     protected Response getSelectReport(
             String select,
-            String email,
+            String emailTo,
+            String emailMsg,
             String formatType,
             CloseableService cs,
             ServletConfig sc)
@@ -819,7 +672,7 @@ public class JerseyFixity
             FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
             logger = fixityService.getLogger();
 
-            StateInf responseState = fixityService.getSelectReport(select, email, formatType);
+            StateInf responseState = fixityService.getSelectReport(select, emailTo, emailMsg, formatType);
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {

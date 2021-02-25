@@ -27,81 +27,77 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-package org.cdlib.mrt.audit.action;
-
-import java.util.Properties;
-import java.util.concurrent.Callable;
-import org.cdlib.mrt.audit.service.FixityServiceConfig;
-import org.cdlib.mrt.audit.service.FixityServiceState;
-
-import org.cdlib.mrt.utility.PropertiesUtil;
+package org.cdlib.mrt.audit.handler;
+import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.TException;
-
 /**
- * Run fixity
+ *
  * @author dloy
  */
-public class PeriodicServiceReport
-        extends FixityActionAbs
-        implements Callable, Runnable, FixityActionInf
+public abstract class FixityHandlerAbs
 {
 
-    protected static final String NAME = "PeriodicServiceReport";
+    protected static final String NAME = "FixityHandlerAbs";
     protected static final String MESSAGE = NAME + ": ";
-    protected static final boolean DEBUG = false;
-    protected FixityServiceConfig fixityServiceConfig = null;
-    protected FixityServiceState fixityServiceState = null;
-    protected Properties [] rows = null;
 
-     protected PeriodicServiceReport(
-            FixityServiceConfig fixityServiceConfig,
+    protected static final boolean DEBUG = false;
+
+
+    protected FixityMRTEntry entry = null;
+    protected LoggerInf logger = null;
+
+    protected FixityHandlerAbs(
+            FixityMRTEntry entry,
             LoggerInf logger)
         throws TException
     {
-        super(null, null, logger);
-        this.fixityServiceConfig = fixityServiceConfig;
+        this.entry = entry;
+        this.logger = logger;
     }
 
-    @Override
-    public void run()
+    public static FixityHandler getFixityHandler(FixityMRTEntry entry, LoggerInf logger)
+        throws TException
     {
-        try {
-            log("run entered");
-            fixityServiceState = fixityServiceConfig.getFixityServiceState();
-
-        } catch (Exception ex) {
-            log("Exception:" + ex);
-            ex.printStackTrace();
-            setException(ex);
-
+        FixityMRTEntry.SourceType methodType = entry.retrieveMapSource();
+        if (methodType == null) methodType = entry.getSource();
+        if (methodType == null) {
+            throw new TException.REQUEST_INVALID("Source element required for this process");
         }
-
+        switch (methodType) {
+            case web: //THIS IS USED BY AUDIT
+                log(logger, "retrun STANDARD Fixity Handler");
+                return getStandardHandler(entry, logger);
+            case merritt:
+                log(logger, "retrun MRTStore Fixity Handler");
+                return getMRTStoreHandler(entry, logger);
+            default:
+                throw new TException.INVALID_OR_MISSING_PARM(
+                        "getFixityHandler methodType not supported");
+        }
     }
 
-    @Override
-    public FixityServiceState call()
+    public static FixityHandlerStandard getStandardHandler(
+            FixityMRTEntry entry,
+            LoggerInf logger)
+        throws TException
     {
-        run();
-        return getFixityServiceState();
+        return new FixityHandlerStandard(entry, logger);
     }
 
-    public Properties[] getRows() {
-        return rows;
-    }
-
-    public void setRows(Properties[] rows) {
-        this.rows = rows;
-    }
-
-    public FixityServiceState getFixityServiceState() {
-        return fixityServiceState;
-    }
-
-    protected void log(String msg)
+    public static FixityHandlerMRTStore getMRTStoreHandler(
+            FixityMRTEntry entry,
+            LoggerInf logger)
+        throws TException
     {
+        return new FixityHandlerMRTStore(entry, logger);
+    }
+
+
+    protected static void log(LoggerInf logger, String msg)
+    {
+        logger.logMessage(msg, 15, true);
         if (!DEBUG) return;
         System.out.println(MESSAGE + msg);
     }
 }
-

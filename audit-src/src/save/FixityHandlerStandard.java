@@ -29,30 +29,28 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.audit.handler;
 
-import java.net.URL;
-import java.util.Vector;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.utility.FixityUtil;
+import org.cdlib.mrt.core.FixityStatusType;
 import org.cdlib.mrt.core.MessageDigest;
-import org.cdlib.mrt.utility.HTTPUtil;
-import org.cdlib.mrt.utility.LinkedHashList;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.TException;
 
 /**
- * Perform standard Fixity test
+ * USED BY AUDIT
  * @author dloy
  */
-public class FixityHandlerMRTStore
+public class FixityHandlerStandard
     extends FixityHandlerAbs
     implements FixityHandler
 {
 
-    protected static final String NAME = "FixityHandlerMRTStore";
+    protected static final String NAME = "FixityHandlerStandard";
     protected static final String MESSAGE = NAME + ": ";
+    protected static final boolean DEBUG = false;
 
-    protected FixityHandlerMRTStore(
+    protected FixityHandlerStandard(
             FixityMRTEntry entry,
             LoggerInf logger)
         throws TException
@@ -64,71 +62,34 @@ public class FixityHandlerMRTStore
     public FixityMRTEntry validate()
         throws TException
     {
-        String buildLocation = null;
         if (entry == null) {
             throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + " missing enty");
         }
-        String location = entry.getUrl();
-        try {
-            FixityMRTEntry.SourceType method = entry.getSource();
-            MessageDigest digest = entry.getDigest();
-            if (StringUtil.isEmpty(location)) {
-                throw new TException.INVALID_DATA_FORMAT(MESSAGE + "Required element missing: location");
-            }
-            if (method == null) {
-                throw new TException.INVALID_DATA_FORMAT(MESSAGE + "Required element missing: method");
-            }
-
-            buildLocation = normalizeQuery(location);
-            entry.setUrl(buildLocation);
-            return entry;
-
-        } catch (Exception ex) {
-            throw new TException.INVALID_DATA_FORMAT(MESSAGE + "URL required - not valid:" + location);
+        String url = entry.getUrl();
+        FixityMRTEntry.SourceType method = entry.getSource();
+        MessageDigest digest = entry.getDigest();
+        if (StringUtil.isEmpty(url)) {
+            throw new TException.INVALID_DATA_FORMAT(MESSAGE + "Required element missing: location");
         }
-    }
-
-    public static String normalizeQuery(String location)
-        throws TException
-    {
-        try {
-
-            String locationLower = location.toLowerCase();
-            if (!locationLower.startsWith("http://")
-                    && !locationLower.startsWith("https://")) {
-                throw new TException.INVALID_DATA_FORMAT(MESSAGE + "Location must be http form URL");
-            }
-            LinkedHashList<String, String> list = HTTPUtil.getQuery(location);
-            Vector<String> tvalue = list.get("t");
-            if (list.size() == 0) {
-                location = location + "?t=ANVL";
-            }
-            else if (tvalue == null) {
-                location = location + "&t=ANVL";
-            } else {
-                String t = tvalue.get(0);
-                String target = "t=" + t;
-                String replace = "t=ANVL";
-                //System.out.println("Normalize: targer=" + target + " - replace=" + replace);
-                location = location.replace(target, replace);
-            }
-            return location;
-
-        } catch (Exception ex) {
-            throw new TException.INVALID_DATA_FORMAT(MESSAGE + "URL required - not valid:" + location);
+        if (method == null) {
+            throw new TException.INVALID_DATA_FORMAT(MESSAGE + "Required element missing: method");
         }
+        if (digest == null) {
+            throw new TException.INVALID_DATA_FORMAT(MESSAGE + "Required element missing: digest or digestType");
+        }
+        return entry;
     }
-
 
     @Override
     public void runFixity()
         throws TException
     {
+        FixityStatusType fixityStatus = null;
         try {
-            String location = entry.retrieveMapURL();
-            if (location == null) location = entry.getUrl();
-            location = normalizeQuery(location);
-            FixityUtil.runStorageFixity(location, entry, 5000, logger);
+            
+                if (DEBUG) System.out.println(MESSAGE + "runFixity entry:" + entry.getItemKey());
+                FixityUtil.runTest(entry, 300000, logger);
+                fixityStatus = entry.getStatus();
 
         } catch (TException tex) {
             throw tex;
@@ -138,7 +99,29 @@ public class FixityHandlerMRTStore
         }
 
     }
+    
+    public void runFixityOriginal()
+        throws TException
+    {
+        FixityStatusType fixityStatus = null;
+        try {
+            for (int ifix=0; ifix<3; ifix++) {
+                if (DEBUG) System.out.println(MESSAGE + "runFixity entry:" + entry.getItemKey());
+                FixityUtil.runTest(entry, 300000, logger);
+                fixityStatus = entry.getStatus();
+                if (fixityStatus == FixityStatusType.verified) break;
+                if (fixityStatus == FixityStatusType.unverified) break;
+                System.out.println(entry.dump(MESSAGE + "***Fixity retry(" + ifix + ")***"));
+                Thread.sleep(30000);
+            }
 
+        } catch (TException tex) {
+            throw tex;
 
+        } catch (Exception ex) {
+            throw new TException.GENERAL_EXCEPTION(ex);
+        }
+
+    }
 }
 
