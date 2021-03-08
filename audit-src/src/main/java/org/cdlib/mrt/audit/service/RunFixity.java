@@ -129,10 +129,14 @@ public class RunFixity implements Runnable
 
 
 
-    protected void addEntry(InvAudit audit)
+    protected void addEntry(Connection connection, InvAudit audit)
         throws TException
     {
         try {
+            long id = audit.getId();
+            if (!ownProcessing(connection, id)) {
+                return;
+            }
             queue.add(audit);
 
         } catch (Exception ex) {
@@ -140,6 +144,15 @@ public class RunFixity implements Runnable
         }
     }
 
+
+    protected boolean ownProcessing(Connection connection, long id)
+        throws TException
+    {
+        int updates = FixityDBUtil.ownInvAudit(id, connection, logger);
+        if (updates == 1) return true;
+        return false;
+    }
+    
     /**
      * Extract the oldest block of untested entries and add entries to a queue for
      * testing
@@ -163,7 +176,7 @@ public class RunFixity implements Runnable
             for (Properties propEntry : props) {
                 if (!fixityState.isRunFixity()) break;
                 InvAudit audit = new InvAudit(propEntry, logger);
-                addEntry(audit);
+                addEntry(connection, audit);
                 log(audit.dump("ADD"));
             }
             log("END ADD");
