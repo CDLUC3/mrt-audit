@@ -65,9 +65,6 @@ public class FixityValidation
     public void run()
     {
         try {
-            if (!ownProcessing(mrtEntry.getItemKey())) {
-                return;
-            }
             connection.setAutoCommit(false);
             setProcessing(mrtEntry.getItemKey());
             handler.runFixity();
