@@ -49,9 +49,9 @@ public class FixityValidationWrapper
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
     protected InvAudit audit = null;
-    protected FixityMRTEntry mrtEntry = null;
     protected FixityItemDB db = null;
     protected LoggerInf logger = null;
+    protected FixityValidation validator = null;
 
     public FixityValidationWrapper(
             InvAudit audit,
@@ -69,7 +69,6 @@ public class FixityValidationWrapper
     {
 
         Connection connection = null;
-        FixityValidation validator = null;
         try {
 
             connection = db.getConnection(false);
@@ -106,6 +105,15 @@ public class FixityValidationWrapper
             String name = t.getName();
             System.out.println(MESSAGE + '[' + name + "]:" + msg);
         } catch (Exception ex) { System.out.println("log exception"); }
+    }
+
+    public InvAudit getAudit() {
+        return audit;
+    }
+    
+    public Boolean isUpdated() {
+        if (validator == null) return null;
+        return validator.isUpdated();
     }
 }
 

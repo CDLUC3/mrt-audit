@@ -202,10 +202,6 @@ public class FixityMRTService
         if (audit == null) {
             throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "update item not found:" + id);
         }
-        RewriteEntry rewriteEntry = fixityServiceConfig.getRewriteEntry();
-        if (rewriteEntry != null) {
-            rewriteEntry.map(audit);
-        }
         ProcessFixityEntry update = ProcessFixityEntry.getProcessFixityEntry("update", audit, connection, localLog);
         FixityMRTEntry responseEntry = update.call();
         if (update.getException() != null) {
@@ -460,6 +456,17 @@ public class FixityMRTService
         //fixityServiceConfig.shutdownPeriodicReport();
         fixityServiceConfig.dbShutDown();
         if (THREADDEBUG) FixityUtil.sysoutThreads("End setShutdown");
+        return setFixityStop();
+    }
+    
+
+    @Override
+    public FixityServiceState setPause()
+        throws TException
+    {
+        if (THREADDEBUG) FixityUtil.sysoutThreads("Begin setPause");
+        fixityServiceConfig.setShutdown(true);
+        if (THREADDEBUG) FixityUtil.sysoutThreads("End setPause");
         return setFixityStop();
     }
 

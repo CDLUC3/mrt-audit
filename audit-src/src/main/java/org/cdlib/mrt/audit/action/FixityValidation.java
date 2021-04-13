@@ -66,9 +66,9 @@ public class FixityValidation
     {
         try {
             connection.setAutoCommit(false);
-            setProcessing(mrtEntry.getItemKey());
+            //redundant setProcessing(mrtEntry.getItemKey());
             handler.runFixity();
-            replaceEntry();
+            updateEntry();
             connection.commit();
 
         } catch (Exception ex) {

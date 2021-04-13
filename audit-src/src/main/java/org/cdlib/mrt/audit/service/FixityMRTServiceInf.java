@@ -97,6 +97,9 @@ public interface FixityMRTServiceInf
 
     public FixityServiceState setShutdown()
         throws TException;
+    
+    public FixityServiceState setPause()
+        throws TException;
 
     public void setStartup()
         throws TException;

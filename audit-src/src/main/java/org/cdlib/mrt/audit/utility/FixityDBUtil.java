@@ -253,7 +253,7 @@ public class FixityDBUtil
         long auditId = entry.getAuditid();
         if (auditId > 0) {
             FixityStatusType status = entry.getStatus();
-            logger.logMessage(">>>Fixity status(" +  auditId + "):" + status.toString(), 1, true);
+            //logger.logMessage(">>>Fixity status(" +  auditId + "):" + status.toString(), 1, true);
         }
         if (entry.getItemKey() > 0) {
             updateAudit(connection, entry, logger);
@@ -282,7 +282,7 @@ public class FixityDBUtil
         return exec(connection, replaceCmd, logger);
      }
     
-    public static void updateAudit(
+    public static boolean updateAudit(
             Connection connection,
             FixityMRTEntry entry,
             LoggerInf logger)
@@ -295,14 +295,26 @@ public class FixityDBUtil
             throw new TException.INVALID_OR_MISSING_PARM("connection not supplied");
         }
         InvAudit audit = entry.getInvAudit();
+        if (audit.getStatus() == FixityStatusType.verified) {
+            if (DEBUG) System.out.println("Verified Status id=" + audit.getId());
+            return false;
+        }
+        System.out.println("Non-verified Status:"
+                + " - id=" + audit.getId()
+                + " - status=" + audit.getStatus()
+        );
         Properties prop = audit.retrieveProp();
         if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("!!!updateAudit", prop));
         long id = audit.getId();
-        prop.remove("id");
-        updateInvAudit(id, connection, prop, logger);
+        prop.remove("id");;
+        int updateCnt = updateInvAudit(id, connection, prop, logger);
+        if (updateCnt <= 0) {
+            throw new TException.GENERAL_EXCEPTION("Update failed on " + id);
+        }
+        return true;
      }
 
-    public static boolean updateInvAudit(
+    public static int updateInvAudit(
             long id,
             Connection connection,
             Properties prop,
@@ -316,7 +328,8 @@ public class FixityDBUtil
             throw new TException.INVALID_OR_MISSING_PARM("connection not supplied");
         }
         String updateCmd = UPDATE_ITEM + buildModify(prop) + " where id=" + id + ";";
-        return exec(connection, updateCmd, logger);
+        
+        return update(connection, updateCmd, logger);
     }
     
     public static int ownInvAudit(
