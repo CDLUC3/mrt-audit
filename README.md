@@ -38,4 +38,4 @@ _General instructions appropriate to an external audience (if applicable)_
 
 ### Deployment and Operations at CDL
 
-https://github.com/CDLUC3/mrt-doc-private/blob/main/audit.md
+https://github.com/CDLUC3/mrt-doc-private/blob/main/uc3-mrt-audit.md
