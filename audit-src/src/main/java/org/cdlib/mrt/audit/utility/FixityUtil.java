@@ -47,6 +47,7 @@ import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.s3.service.NodeIO;
+import org.cdlib.mrt.s3.tools.CloudChecksum;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FixityStatusType;
 import org.cdlib.mrt.core.MessageDigest;
@@ -172,6 +173,100 @@ public class FixityUtil
                     inputStream.close();
                 } catch (Exception e) { }
             }
+        }
+    }
+
+    public static void runCloudChecksum(
+            FixityMRTEntry entry,
+            int timeout,
+            LoggerInf logger)
+        throws TException
+   {
+        MessageDigest digest = entry.getDigest();
+        if (digest == null) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "runTest - Exception: no digest provided");
+        }
+        String checksumType = digest.getJavaAlgorithm();
+        String checksum = digest.getValue();
+        long fileSize = entry.getSize();
+        if (DEBUG) System.out.println("!!!FixityUtil size:" + fileSize);
+        String location = entry.getUrl();
+        if (location == null) {
+            throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "runTest - Exception: no location provided");
+        }
+        //Some escape characters invalidly exist in URL remove them
+        location = removeEsc(location);
+        //logger.logMessage(">>>Fixity test(" + entry.getAuditid() + "):" + location, 1, true);
+        if (DEBUG) System.out.println("!!!FixityUtil location:" + location);
+        entry.setStatus(FixityStatusType.processing);
+        CloudChecksum cc = null;
+        
+        try {
+            NearLineResult nearLineResult = nearLineTest(location, entry, logger);
+            if (nearLineResult != null) {
+                setEntry(
+                    nearLineResult.fileSizeMatch,nearLineResult.dataSize,
+                    nearLineResult.checksumMatch, nearLineResult.dataChecksumType, nearLineResult.dataChecksum,
+                    entry);
+                logger.logMessage(entry.dump("nearLineTest"), 3, true);
+                if (DEBUG) System.out.println("NearLineResult NOT null");
+                return;
+            } else {
+                if (DEBUG) System.out.println("NearLineResult null");
+            }
+            try {
+                if (DEBUG) System.out.println("runTest"
+                        + " - Location:" + location
+                        + " - timeout:" + timeout
+                        );
+                cc = FixityServiceConfig.getCloudChecksum(location);
+                
+            } catch (TException.EXTERNAL_SERVICE_UNAVAILABLE tex) {
+                addSystemException(entry, tex);
+                return;
+
+            } catch (TException.REQUESTED_ITEM_NOT_FOUND rinf) {
+                addStatusUnverified(entry, rinf);
+                return;
+
+            } catch (TException.REQUEST_ITEM_EXISTS rinf) {
+                addStatusUnverified(entry, rinf);
+                return;
+
+            } catch (Exception ex) {
+                throw ex;
+            }
+            long startTime = System.currentTimeMillis();
+            cc.process();
+            long procTime = System.currentTimeMillis() - startTime;
+            CloudChecksum.Digest test = cc.getDigest(checksumType);
+            CloudChecksum.CloudChecksumResult fixityResult
+                    = cc.validateSizeChecksum(checksum, checksumType, fileSize, logger);
+            setEntry(
+                    fixityResult.fileSizeMatch,test.inputSize,
+                    fixityResult.checksumMatch, checksumType, test.checksum,
+                    entry);
+
+            double per = (double)fileSize/(double)procTime;
+            logger.logMessage(">>>Test(" + entry.getAuditid() + "):"
+                + " - size:" + fileSize
+                + " - sT:" + fixityResult.fileSizeMatch
+                + " - cT:" + fixityResult.checksumMatch
+                + " - time:" + procTime
+                + " - B/Ms:" + per
+                    , 
+                    2, true);
+            
+        } catch (TException.EXTERNAL_SERVICE_UNAVAILABLE tex) {
+            addSystemException(entry, tex);
+            
+        } catch (Exception ex) {
+            logger.logError(MESSAGE + ex, 2);
+            if (ex instanceof TException) {
+                throw (TException) ex;
+            }
+            throw new TException.GENERAL_EXCEPTION(ex);
+
         }
     }
     

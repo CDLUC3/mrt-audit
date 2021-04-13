@@ -47,7 +47,7 @@ public class FixityServiceState
 {
     private static final String NAME = "FixityServiceState";
     private static final String MESSAGE = NAME + ": ";
-    public enum StateStatus  { unknown, paused, running, shuttingdown, shutdown; }
+    public enum StateStatus  { unknown, paused, running, shuttingdown, shutdown, pause; }
 
     protected String name = null;
     protected String identifier = null;

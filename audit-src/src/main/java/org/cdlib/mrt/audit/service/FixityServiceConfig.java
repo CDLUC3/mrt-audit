@@ -53,6 +53,7 @@ import org.cdlib.mrt.formatter.FormatterInf;
 
 
 import org.cdlib.mrt.s3.service.NodeIO;
+import org.cdlib.mrt.s3.tools.CloudChecksum;
 import org.cdlib.mrt.security.SecurityUtil;
 import org.cdlib.mrt.tools.SSMConfigResolver;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -590,7 +591,11 @@ public class FixityServiceConfig
                 if (fixityState.isFixityProcessing()) {
                     state.setStatus(FixityServiceState.StateStatus.shuttingdown);
                 } else {
-                    state.setStatus(FixityServiceState.StateStatus.shutdown);
+                    if (db != null) {
+                        state.setStatus(FixityServiceState.StateStatus.pause);
+                    } else {
+                        state.setStatus(FixityServiceState.StateStatus.shutdown);
+                    }
                 }
             }
             return state;
@@ -598,6 +603,20 @@ public class FixityServiceConfig
         } catch (Exception ex) {
             throw new TException(ex);
         }
+    }
+    
+    public static CloudChecksum getCloudChecksum(String fixityURL)
+        throws TException
+    {
+        NodeIO.AccessKey accessKey = nodeIO.getAccessKey(fixityURL);
+        CloudStoreInf service = accessKey.accessNode.service;
+        String bucket = accessKey.accessNode.container;
+        String key = accessKey.key;
+        String [] types = {
+                    "sha256"
+                };
+        CloudChecksum ccsum = CloudChecksum.getChecksums(types, service, bucket, key);
+        return ccsum;
     }
 
     public FixityItemDB getDb() {

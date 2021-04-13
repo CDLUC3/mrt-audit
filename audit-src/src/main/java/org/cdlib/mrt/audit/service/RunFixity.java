@@ -42,12 +42,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.sql.Connection;
+import java.util.ArrayList;
 
 
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixNames;
 import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
+import org.cdlib.mrt.audit.utility.FixityOwn;
 import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.utility.DateUtil;
@@ -82,11 +84,13 @@ public class RunFixity implements Runnable
     private static final String MESSAGE = NAME + ": ";
 
     private static final boolean DEBUG = false;
+    private static final boolean STOP = false;
     protected LoggerInf logger = null;
     protected FixityItemDB db = null;
     protected long maxout = 100000000;
     protected Exception exception = null;
     protected String auditQualify = "";
+    protected boolean start=true;
 
 
     protected int capacity = 100;
@@ -127,31 +131,6 @@ public class RunFixity implements Runnable
         }
     }
 
-
-
-    protected void addEntry(Connection connection, InvAudit audit)
-        throws TException
-    {
-        try {
-            long id = audit.getId();
-            if (!ownProcessing(connection, id)) {
-                return;
-            }
-            queue.add(audit);
-
-        } catch (Exception ex) {
-            throw new TException(ex);
-        }
-    }
-
-
-    protected boolean ownProcessing(Connection connection, long id)
-        throws TException
-    {
-        int updates = FixityDBUtil.ownInvAudit(id, connection, logger);
-        if (updates == 1) return true;
-        return false;
-    }
     
     /**
      * Extract the oldest block of untested entries and add entries to a queue for
@@ -162,25 +141,29 @@ public class RunFixity implements Runnable
     protected int addSQLEntries()
         throws TException
     {
-        Connection connection = null;
+        Connection ownConnect = null;
         try {
-            connection = db.getConnection(true);
-            String sql = "select * "
-                    + "from " + FixNames.AUDIT_TABLE + " "
-                    + "where not status='processing' "
-                    + " " + auditQualify + " "
-                    + "order by verified "
-                    + "limit " + capacity + ";";
-            Properties [] props = FixityDBUtil.cmd(connection, sql, logger);
-            if ((props == null) || (props.length==0)) return 0;
-            for (Properties propEntry : props) {
-                if (!fixityState.isRunFixity()) break;
-                InvAudit audit = new InvAudit(propEntry, logger);
-                addEntry(connection, audit);
-                log(audit.dump("ADD"));
+            try {
+                ownConnect = db.getConnection(false);
+                if (!ownConnect.isValid(500)) {
+                    throw new TException.GENERAL_EXCEPTION("Connection not valid");
+                }
+                if (start) {
+                    logger.logMessage("Start runFixity queue", 1, true);
+                }
+                long startMs = System.currentTimeMillis();
+                queue = FixityOwn.getOwnListAudit(ownConnect, auditQualify, capacity, logger);
+                long stopMs = System.currentTimeMillis();
+                if (start) {
+                    logger.logMessage("Queue:" + queue.size() + " - Ms:" + (stopMs - startMs), 1, true);
+                    start = false;
+                }
+                    
+            } finally {
+                ownConnect.close();
             }
             log("END ADD");
-            return props.length;
+            return queue.size();
 
         } catch (TException fe) {
             throw fe;
@@ -197,11 +180,11 @@ public class RunFixity implements Runnable
 
         } finally {
             try {
-                connection.close();
+                ownConnect.close();
             } catch (Exception ex) {}
         }
     }
-
+    
     /**
      * Main method - used only for testing
      */
@@ -351,7 +334,12 @@ public class RunFixity implements Runnable
     protected void processBlock()
         throws TException
     {
+        
+        Connection auditConnection = null;
+        
+        ArrayList<FixityValidationWrapper> fixityWrapperList = new ArrayList<FixityValidationWrapper>();
         try {
+            auditConnection = db.getConnection(true);
             if (addSQLEntries() == 0) {
                 log("No ITEM content - sleep 30 seconds");
                 Thread.sleep(30000);
@@ -361,20 +349,54 @@ public class RunFixity implements Runnable
             if (!fixityState.isRunFixity()) return;
             ExecutorService threadPool 
                     = Executors.newFixedThreadPool(fixityState.getThreadPool());
+            
+            long startMs = System.currentTimeMillis();
             for(int i = 0; i < capacity; i++){
                 if (!fixityState.isRunFixity()) break;
                 InvAudit audit = getEntry();
                 if (audit == null) break;
-                sleepInterval(audit);
+                //sleepInterval(audit);
                 log("PROCESS:" + audit.getId());
-                if (!fixityState.isRunFixity()) break;
                 FixityValidationWrapper wrapper
                         = new FixityValidationWrapper(audit, db, logger);
+                
                 threadPool.execute(wrapper);
+                fixityWrapperList.add(wrapper);
                 fixityState.bumpCnt();
             }
             threadPool.shutdown();
             threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            
+            LinkedList<Long> verifiedList = new LinkedList<Long>();
+            for (FixityValidationWrapper wrapper : fixityWrapperList) {
+                long id = wrapper.getAudit().getId();
+                if (!wrapper.isUpdated()) {
+                    verifiedList.add(id);
+                } else {
+                    //System.out.println("Updated(" + id + ") status=" + wrapper.getAudit().getStatus());
+                }
+            }
+            
+            long startCompleteMs = System.currentTimeMillis();
+            FixityOwn.completeOwnList(auditConnection, verifiedList, logger);
+            long stopMs = System.currentTimeMillis();
+            if (STOP) stop();
+            // long sleepTime = 700 - (delta * 50);
+            long sleepTime = fixityState.getQueueSleepMs();
+            if (sleepTime > 0) {
+                Thread.sleep(sleepTime);
+            }
+            
+            String msg = MESSAGE
+                    + " - capacity=" + capacity
+                    + " - sleepTime=" + sleepTime
+                    + " - verified=" + verifiedList.size()
+                    + " - non-verified=" + (capacity - verifiedList.size())
+                    + " - processMs=" + (stopMs - startMs)
+                    + " - runVerifiedMs=" + (stopMs - startCompleteMs);
+            //System.out.println(msg);
+            logger.logMessage(msg, 1, true);
+            
             log("************Termination of threads");
 
         } catch (TException fe) {
@@ -392,9 +414,25 @@ public class RunFixity implements Runnable
                         StringUtil.stackTrace(e), 10);
             }
             throw new TException(e);
+            
+        } finally {
+            try {
+                auditConnection.close();
+            } catch (Exception ex) {}
         }
     }
-
+    
+    private static void stop() 
+        throws TException
+    {
+        try {
+            throw new TException.GENERAL_EXCEPTION("stop");
+        } catch (TException tex) {
+            tex.printStackTrace();
+            throw tex;
+        }
+    }
+            
     /**
      * This routine throttles fixity by using two type of intervals. 
      * The queue sleep interval issues a thread sleep between the process 

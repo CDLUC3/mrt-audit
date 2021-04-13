@@ -42,7 +42,7 @@ import org.cdlib.mrt.audit.utility.FixityUtil;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FixityStatusType;
 import org.cdlib.mrt.core.MessageDigest;
-import static org.cdlib.mrt.audit.db.FixityMRTEntry.DEBUG;
+import org.cdlib.mrt.audit.utility.FixityOwn;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
@@ -117,7 +117,7 @@ public class ProcessFixityEntry
                 return;
             case update:  
                 TimerUtil.start(logger, "runUpdate");
-                runUpdate();
+                runUpdate2();
                 TimerUtil.end(logger, "runUpdate");
                 return;
             default: {
@@ -188,6 +188,47 @@ public class ProcessFixityEntry
             try {
                 connection.close();
             } catch (Exception ex) { }
+        }
+
+    }
+    
+    
+
+    public void runUpdate2()
+    {
+        try {
+            log("runUpdate2 entered");
+            connection.setAutoCommit(true);
+            long id = getItemID(mrtEntry);
+            if(id < 1) {
+                throw new TException.REQUESTED_ITEM_NOT_FOUND(
+                        "No matching URL was found for this item:" + mrtEntry.getUrl());
+            }
+            int result = FixityOwn.ownInvAudit(id, connection, logger);
+            if (result <= 0) {
+                System.out.print("Warning audit update not owned:" + id);
+                /*
+                throw new TException.CONCURRENT_UPDATE(
+                        "Item currently being processed:" + mrtEntry.getUrl());
+                */
+            }
+            InvAudit audit = FixityDBUtil.getAudit(connection, id, logger);
+            if (connection == null) return;
+            
+            connection.setAutoCommit(false);
+            FixityValidation validator = FixityActionAbs.getFixityValidation(audit, connection, logger);
+            validator.run();
+            connection.commit();
+            
+
+        } catch (Exception ex) {
+            try {
+                connection.rollback();
+            } catch(Exception rex) { 
+                System.out.println(MESSAGE + "rollback exception");
+            }
+            setRunException(ex);
+
         }
 
     }

@@ -88,7 +88,7 @@ public class FixityHandlerStandard
         try {
             
                 if (DEBUG) System.out.println(MESSAGE + "runFixity entry:" + entry.getItemKey());
-                FixityUtil.runTest(entry, 300000, logger);
+                FixityUtil.runCloudChecksum(entry, 300000, logger);
                 fixityStatus = entry.getStatus();
 
         } catch (TException tex) {

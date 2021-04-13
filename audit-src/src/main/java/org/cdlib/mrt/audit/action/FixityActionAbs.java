@@ -62,6 +62,7 @@ public class FixityActionAbs
     protected LoggerInf logger = null;
     protected Connection connection = null;
     protected Exception exception = null;
+    protected boolean updated = false;
 
     public static ProcessFixityEntry getProcessFixityEntry(
             String cmdType,
@@ -190,7 +191,7 @@ public class FixityActionAbs
         return FixityDBUtil.matchItemKey(connection, item, logger);
     }
 
-    protected void setProcessing(long id)
+    protected void setProcessingOld(long id)
         throws TException
     {
         Properties prop = new Properties();
@@ -220,17 +221,12 @@ public class FixityActionAbs
         mrtEntry.setItemKey(itemKey);
     }
 
-    protected void replaceEntry()
-        throws TException
-    {
-        FixityDBUtil.replaceInvAudit(connection, mrtEntry, logger);
-    }
-
-    protected void updateEntry()
+    protected boolean updateEntry()
         throws TException
     {
         if (FixityActionAbs.DEBUG) System.out.println(PropertiesUtil.dumpProperties("!!!updateEntry", mrtEntry.retrieveProperties()));
-        FixityDBUtil.updateAudit(connection, mrtEntry, logger);
+        updated = FixityDBUtil.updateAudit(connection, mrtEntry, logger);
+        return updated;
     }
 
     public FixityMRTEntry getEntry() {
@@ -263,6 +259,14 @@ public class FixityActionAbs
 
     public void setAudit(InvAudit audit) {
         this.audit = audit;
+    }
+
+    public boolean isUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(boolean updated) {
+        this.updated = updated;
     }
     
 }

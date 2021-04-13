@@ -156,6 +156,9 @@ public class JerseyFixity
         } else if (setType.equals("stop")) {
             return shutdownFixity(formatType, cs, sc);
 
+        } else if (setType.equals("pause")) {
+            return pauseFixity(formatType, cs, sc);
+
         } else  {
             throw new TException.REQUEST_ELEMENT_UNSUPPORTED("Set fixity state value not recognized:" + setType);
         }
@@ -464,6 +467,33 @@ public class JerseyFixity
         }
     }
 
+
+    public Response pauseFixity(
+            String formatType,
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = defaultLogger;
+        try {
+            log("pauseFixity entered:"
+                    + " - formatType=" + formatType
+                    );
+            FixityServiceInit fixityServiceInit = FixityServiceInit.getFixityServiceInit(sc);
+            FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
+            logger = fixityService.getLogger();
+
+            StateInf responseState = fixityService.setPause();
+            return getStateResponse(responseState, formatType, logger, cs, sc);
+
+        } catch (TException tex) {
+            return getExceptionResponse(tex, formatType, logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
 
     /**
      * Return fixity entry item(s) - return multiple entries if truncation is used
