@@ -8,6 +8,7 @@ audit-info:
     intervalDays: "{!SSM: audit/config/intervalDays !DEFAULT: 0}"
     queueSleepMs: "{!SSM: audit/config/queueSleepMs !DEFAULT: 0}"
     queueCapacity: "{!SSM: audit/config/queueCapacity !DEFAULT: 100}"
+    sizeChecksumBuffer: "{!SSM: audit/config/sizeChecksumBuffer !DEFAULT: 32000000}"
     
   state:
     id: audit

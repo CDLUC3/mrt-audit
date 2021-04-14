@@ -93,6 +93,7 @@ public class FixityServiceConfig
     protected FixityServiceStateManager serviceStateManager = null;
     protected FixityState fixityState = null;
     protected RewriteEntry rewriteEntry = null;
+    protected static Integer sizeChecksumBuffer = null;
     
     private static class Test{ };
     
@@ -136,6 +137,7 @@ public class FixityServiceConfig
             setFixityItemDB();
             serviceStateManager
                     = FixityServiceStateManager.getFixityServiceStateManager(logger, setupProperties);
+            setSizeChecksumBuffer();
             setNodeIO();
             
             FixityServiceState state = new FixityServiceState(setupProperties);
@@ -214,6 +216,17 @@ public class FixityServiceConfig
             
         } catch (TException tex) {
             throw tex;
+            
+        } catch (Exception ex) {
+            throw new TException(ex);
+        }
+    }
+    
+    public void setSizeChecksumBuffer()
+        throws TException
+    {
+        try {
+            this.sizeChecksumBuffer = serviceJSON.getInt("sizeChecksumBuffer");
             
         } catch (Exception ex) {
             throw new TException(ex);
@@ -473,9 +486,10 @@ public class FixityServiceConfig
             if (serviceStatus == ServiceStatus.running) {
                 db.shutDown();
             }
+            System.out.println("sizeChecksumBuffer:" + fixityServiceConfig.getSizeChecksumBuffer());   
             NodeIO nodeIO = fixityServiceConfig.getNodeIO();
             nodeIO.printNodes("test");
-            validateNodeIO(nodeIO);
+            validateNodeIO(nodeIO);      
             
         } catch (Exception ex) {
                 // TODO Auto-generated catch block
@@ -604,6 +618,10 @@ public class FixityServiceConfig
             throw new TException(ex);
         }
     }
+
+    public Integer getSizeChecksumBuffer() {
+        return sizeChecksumBuffer;
+    }
     
     public static CloudChecksum getCloudChecksum(String fixityURL)
         throws TException
@@ -615,7 +633,7 @@ public class FixityServiceConfig
         String [] types = {
                     "sha256"
                 };
-        CloudChecksum ccsum = CloudChecksum.getChecksums(types, service, bucket, key);
+        CloudChecksum ccsum = CloudChecksum.getChecksums(types, service, bucket, key, sizeChecksumBuffer);
         return ccsum;
     }
 
