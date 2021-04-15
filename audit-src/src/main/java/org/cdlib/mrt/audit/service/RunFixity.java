@@ -351,6 +351,7 @@ public class RunFixity implements Runnable
                     = Executors.newFixedThreadPool(fixityState.getThreadPool());
             
             long startMs = System.currentTimeMillis();
+            long bytes = 0;
             for(int i = 0; i < capacity; i++){
                 if (!fixityState.isRunFixity()) break;
                 InvAudit audit = getEntry();
@@ -369,6 +370,9 @@ public class RunFixity implements Runnable
             
             LinkedList<Long> verifiedList = new LinkedList<Long>();
             for (FixityValidationWrapper wrapper : fixityWrapperList) {
+                try {
+                    bytes += wrapper.getValidator().getEntry().getSize();
+                } catch (Exception bex) { }
                 long id = wrapper.getAudit().getId();
                 if (!wrapper.isUpdated()) {
                     verifiedList.add(id);
@@ -393,7 +397,9 @@ public class RunFixity implements Runnable
                     + " - verified=" + verifiedList.size()
                     + " - non-verified=" + (capacity - verifiedList.size())
                     + " - processMs=" + (stopMs - startMs)
-                    + " - runVerifiedMs=" + (stopMs - startCompleteMs);
+                    + " - runVerifiedMs=" + (stopMs - startCompleteMs
+                    + " - bytes=" + bytes
+                    );
             //System.out.println(msg);
             logger.logMessage(msg, 1, true);
             

@@ -110,6 +110,10 @@ public class FixityValidationWrapper
     public InvAudit getAudit() {
         return audit;
     }
+
+    public FixityValidation getValidator() {
+        return validator;
+    }
     
     public Boolean isUpdated() {
         if (validator == null) return null;
