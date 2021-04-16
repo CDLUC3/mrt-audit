@@ -7,6 +7,8 @@ This microservice is part of the [Merritt Preservation System](https://github.co
 This microservice performs a fixity check on each instance of a file stored in the Merritt Preservation Service on a rotating basis. 
 The goal is to check the each file every 3 months.  For offline copies of a file (Glacier), a metadata check is performed rather than a fixity check.
 
+The work that this service performs is determined by querying the Merritt Inventory Database.
+
 ## Component Diagram
 ![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/master/diagrams/audit.mmd.svg)
 
