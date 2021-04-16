@@ -313,6 +313,30 @@ public class FixityDBUtil
         }
         return true;
      }
+    
+    public static boolean updateAuditVerified(
+            Connection connection,
+            FixityMRTEntry entry,
+            LoggerInf logger)
+        throws TException
+    {
+        if (entry == null) {
+            throw new TException.INVALID_OR_MISSING_PARM("entry not supplied");
+        }
+        if (connection == null) {
+            throw new TException.INVALID_OR_MISSING_PARM("connection not supplied");
+        }
+        InvAudit audit = entry.getInvAudit();
+        Properties prop = audit.retrieveProp();
+        if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("!!!updateAudit", prop));
+        long id = audit.getId();
+        prop.remove("id");;
+        int updateCnt = updateInvAudit(id, connection, prop, logger);
+        if (updateCnt <= 0) {
+            throw new TException.GENERAL_EXCEPTION("Update failed on " + id);
+        }
+        return true;
+     }
 
     public static int updateInvAudit(
             long id,

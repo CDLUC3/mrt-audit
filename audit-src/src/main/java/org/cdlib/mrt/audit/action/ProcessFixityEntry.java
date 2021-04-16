@@ -216,7 +216,7 @@ public class ProcessFixityEntry
             if (connection == null) return;
             
             connection.setAutoCommit(false);
-            FixityValidation validator = FixityActionAbs.getFixityValidation(audit, connection, logger);
+            FixityValidationEntry validator = FixityActionAbs.getFixityValidationEntry(audit, connection, logger);
             validator.run();
             connection.commit();
             

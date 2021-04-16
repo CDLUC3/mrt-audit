@@ -93,6 +93,16 @@ public class FixityActionAbs
         return new FixityValidation(audit, connection, logger);
 
     }
+    
+    public static FixityValidationEntry getFixityValidationEntry(
+            InvAudit audit,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        return new FixityValidationEntry(audit, connection, logger);
+
+    }
 
     public static FixityReportEntries getFixityReportEntries(
             InvAudit audit,
@@ -226,6 +236,14 @@ public class FixityActionAbs
     {
         if (FixityActionAbs.DEBUG) System.out.println(PropertiesUtil.dumpProperties("!!!updateEntry", mrtEntry.retrieveProperties()));
         updated = FixityDBUtil.updateAudit(connection, mrtEntry, logger);
+        return updated;
+    }
+
+    protected boolean updateEntryVerified()
+        throws TException
+    {
+        if (FixityActionAbs.DEBUG) System.out.println(PropertiesUtil.dumpProperties("!!!updateEntry", mrtEntry.retrieveProperties()));
+        updated = FixityDBUtil.updateAuditVerified(connection, mrtEntry, logger);
         return updated;
     }
 

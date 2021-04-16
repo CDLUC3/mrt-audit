@@ -318,6 +318,7 @@ public class FixityUtil
         throws TException
     {
         try {
+            if (DEBUG) System.out.println("+++entered nearLineTest");
             //String GLACIER = "GLACIER";
             String NEARLINE = "near-line"; //<<<USE
             //String NEARLINE = "on-line"; // <<< REMOVE TEST
@@ -346,6 +347,8 @@ public class FixityUtil
             if (!accessMode.equals(NEARLINE)) {
                 return null;
             }
+            NearLineResult nearLine = new NearLineResult();
+            nearLine.dataChecksumType = "SHA-256";
             
             String serviceType = accessNode.serviceType;
             if (DEBUG) System.out.println("serviceType:" + serviceType);
@@ -353,9 +356,11 @@ public class FixityUtil
             String container = accessNode.container;
             String key = accessKey.key;
             Properties prop = service.getObjectMeta(container, key);
+            //System.out.println(PropertiesUtil.dumpProperties("++++nearline+++", prop));
             if (prop == null)  {
                 if (DEBUG) System.out.println("No Object Meta found");
-                return null;
+                nearLine.error = "No Object Meta found";
+                return nearLine;
             }
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***KEY:" + key, prop));
             
@@ -371,23 +376,29 @@ public class FixityUtil
             }
             */
             
-            NearLineResult nearLine = new NearLineResult();
-            nearLine.dataChecksum = prop.getProperty("sha256");
-            if (nearLine.dataChecksum == null)  {
-                System.out.println("No prop sha256");
-                return null;
-            }
-            nearLine.dataChecksumType = "SHA-256";
+
             if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("***KEY2:" + key, prop));
             String sizeS = prop.getProperty("size");
             if (sizeS == null) {
-                System.out.println("No size:"+sizeS);
-                return null;
+                throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "runTest - Exception: cloud size required");
             }
             nearLine.dataSize = Long.parseLong(sizeS);
+            
             MessageDigest digest = entry.getDigest();
             if (digest == null) {
                 throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "runTest - Exception: no digest provided");
+            }
+            
+            nearLine.dataChecksum = prop.getProperty("sha256");
+            // this test defaults a true checksum if not provided
+            if (nearLine.dataChecksum == null)  {
+                nearLine.error = "No prop sha256";
+                nearLine.checksumMatch = true;
+                nearLine.dataChecksum = digest.getValue();
+                if (nearLine.dataSize == entry.getSize()) {
+                    nearLine.fileSizeMatch = true;
+                }
+                return nearLine;
             }
             if (DEBUG) System.out.println("Match:"
                     + " - nearLine.dataSize:" + nearLine.dataSize
@@ -812,6 +823,7 @@ public class FixityUtil
         public Long dataSize = null;
         public String dataChecksumType = null;
         public String dataChecksum = null;
+        public String error = null;
     
         /**
          * Dump the content of this object to a string for logging
