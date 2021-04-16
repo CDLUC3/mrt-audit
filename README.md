@@ -1,40 +1,32 @@
-The Merritt Audit Micro-service
-===============================
+# Merritt Storage
 
-### Overview - part of the Merritt System
+This microservice is part of the [Merritt Preservation System](https://github.com/CDLUC3/mrt-doc).
 
-Link to mrt-doc README: https://github.com/CDLUC3/mrt-doc/blob/master/README.md
+## Purpose
 
+This microservice performs a fixity check on each instance of a file stored in the Merritt Preservation Service on a rotating basis. 
+The goal is to check the each file every 3 months.  For offline copies of a file (Glacier), a metadata check is performed rather than a fixity check.
 
-#### Purpose
+## Component Diagram
+![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/master/diagrams/audit.mmd.svg)
 
-_1-2 sentences describing the service_
+## Dependencies
 
+This code depends on the following Merritt Libraries.
+- [Merritt Cloud API](https://github.com/CDLUC3/mrt-cloud)
+- [Merritt Core Library](https://github.com/CDLUC3/mrt-core2)
 
-### Component Diagram
+## For external audiences
+This code is not intended to be run apart from the Merritt Preservation System.
 
-_Original image should be housed in either the code repo or inside of mrt-doc_
+See [Merritt Docker](https://github.com/CDLUC3/merritt-docker) for a description of how to build a test instnce of Merritt.
 
+## Build instructions
+This code is deployed as a war file. The war file is built on a Jenkins server.
 
-### Dependencies
+## Test instructions
 
-_Link to key code repos upon which this is dependent_
-
-
-### For external audiences
-
-_Describe how a non-CDL audience might use this repo_
-
-
-### Build instructions
-
-_General instructions appropriate to an external audience (if applicable)_
-
-
-### Test instructions
-
-_General instructions appropriate to an external audience (if applicable)_
-
+## Internal Links
 
 ### Deployment and Operations at CDL
 
