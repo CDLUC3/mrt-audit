@@ -1,4 +1,4 @@
-# Merritt Storage
+# Merritt Audit Service
 
 This microservice is part of the [Merritt Preservation System](https://github.com/CDLUC3/mrt-doc).
 
