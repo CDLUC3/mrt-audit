@@ -89,7 +89,7 @@ public class FixityServiceConfig
     private static NodeIO nodeIO = null;
     protected Properties cleanupEmailProp = null;
     
-    protected FixityItemDB db = null;
+    protected static FixityItemDB db = null;
     protected FixityServiceStateManager serviceStateManager = null;
     protected FixityState fixityState = null;
     protected RewriteEntry rewriteEntry = null;
@@ -664,7 +664,7 @@ public class FixityServiceConfig
         db = getNewDb();
     }
 
-    public Connection getConnection(boolean autoCommit)
+    public static Connection getConnection(boolean autoCommit)
         throws TException
     {
         if (db == null) return null;

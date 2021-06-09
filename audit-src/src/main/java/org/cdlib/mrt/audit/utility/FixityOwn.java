@@ -361,6 +361,12 @@ System.out.println("auditQualify:" + auditQualify + "\nsql:" + sql + "\n"
     {
         
         try {
+            if (ownConnect == null) return 0;
+            if (!ownConnect.isValid(1)) {
+                logger.logMessage(MESSAGE + "updateAudit reset", 1, true);
+                ownConnect = FixityServiceConfig.getConnection(true);
+                if (ownConnect == null) return 0;
+            }
             //System.out.println("completeOwnList:" + ids.size());
             if ((ids == null) || (ids.size()==0)) return null;
             ownConnect.setAutoCommit(true);
