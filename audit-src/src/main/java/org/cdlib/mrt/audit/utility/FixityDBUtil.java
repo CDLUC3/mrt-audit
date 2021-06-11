@@ -38,6 +38,7 @@ import java.util.Properties;
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixNames;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
+import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.core.FixityStatusType;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.SQLUtil;
@@ -303,6 +304,17 @@ public class FixityDBUtil
                 + " - id=" + audit.getId()
                 + " - status=" + audit.getStatus()
         );
+        try {
+            if (!connection.isValid(1)) {
+                logger.logMessage(MESSAGE + "updateAudit reset", 1, true);
+                connection = FixityServiceConfig.getConnection(false);
+                if (connection == null) {
+                    throw new TException.INVALID_OR_MISSING_PARM("connection not reset:" + audit.getId());
+                }
+            }
+        } catch (Exception ex) {
+            throw new TException(ex);
+        }
         Properties prop = audit.retrieveProp();
         if (DEBUG) System.out.println(PropertiesUtil.dumpProperties("!!!updateAudit", prop));
         long id = audit.getId();
