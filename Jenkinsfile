@@ -75,7 +75,7 @@ pipeline {
             steps {
                 script {
                   sh "cp build.current.txt ${tagname}"
-                  archiveArtifacts artifacts: "${tagname}, build.current.txt, mrt-audit/mrt-auditwarpub/target/mrt-auditwarpub-1.0-SNAPSHOT.war", onlyIfSuccessful: true
+                  archiveArtifacts artifacts: "${tagname}, build.current.txt, mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war", onlyIfSuccessful: true
                 } 
             }
         }
