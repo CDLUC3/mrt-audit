@@ -38,8 +38,9 @@ pipeline {
                 dir('mrt-core2') {
                   git branch: "${env.BRANCH_CORE}", url: 'https://github.com/CDLUC3/mrt-core2.git'
                   sh "git remote get-url origin >> ../build.current.txt"
+                  sh "git branch >> ../build.current.txt"
                   sh "git log --pretty=full -n 1 >> ../build.current.txt"
-                  sh "mvn -Dmaven.repo.local=${m2dir} clean install -DskipTests"
+                  sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install -DskipTests"
                 }
             }
         }
@@ -48,8 +49,9 @@ pipeline {
                 dir('mrt-cloud') {
                   git branch: "${env.BRANCH_CLOUD}", url: 'https://github.com/CDLUC3/mrt-cloud.git'
                   sh "git remote get-url origin >> ../build.current.txt"
+                  sh "git branch >> ../build.current.txt"
                   sh "git log --pretty=full -n 1 >> ../build.current.txt"
-                  sh "mvn -Dmaven.repo.local=${m2dir} clean install -DskipTests"
+                  sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install -DskipTests"
                 }
             }
         }
@@ -62,8 +64,9 @@ pipeline {
                         branches: [[name: "refs/tags/${tagname}"]],
                   ])
                   sh "git remote get-url origin >> ../build.current.txt"
+                  sh "git branch >> ../build.current.txt"
                   sh "git log --pretty=medium -n 1 >> ../build.current.txt"
-                  sh "mvn -Dmaven.repo.local=${m2dir} clean install"
+                  sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install"
                 }
             }
         }
