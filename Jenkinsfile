@@ -76,6 +76,7 @@ pipeline {
                 script {
                   sh "cp build.current.txt ${tagname}"
                   archiveArtifacts artifacts: "${tagname}, build.current.txt, mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war", onlyIfSuccessful: true
+                  copyArtifacts filter: '*.war', fingerprintArtifacts: true, projectName: 'mrt-audit-refactor', selector: lastSuccessful(), target: 'merritt'
                 } 
             }
         }
