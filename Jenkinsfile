@@ -12,7 +12,7 @@ pipeline {
       //working vars
       m2dir = "${HOME}/.m2-audit"
       defbranch = "master"
-      usebranch = binding.hasVariable("branch") ? branch : defbranch
+      usebranch = binding.hasVariable("branch") ? "${branch}" : "${defbranch}"
     }
     agent any
 
