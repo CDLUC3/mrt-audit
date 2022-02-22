@@ -83,6 +83,7 @@ pipeline {
                   archiveArtifacts \
                     artifacts: "${tagname}, build.current.txt, mrt-audit-${tagname}.war"
                     onlyIfSuccessful: true
+                }
             }
         }
     }
