@@ -12,7 +12,6 @@ pipeline {
       //working vars
       m2dir = "${HOME}/.m2-audit"
       defbranch = "master"
-      usebranch = binding.hasVariable("branch") ? "${branch}" : "${defbranch}"
     }
     agent any
 
@@ -60,12 +59,16 @@ pipeline {
         stage('Build Audit') {
             steps {
                 dir('mrt-audit'){
-                  git branch: "${usebranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
-                  if binding.hasVariable("tagname")
-                    checkout([
+                  if binding.hasVariable("branch")  
+                    git branch: "${branch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
+                  else
+                    git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
+                    if binding.hasVariable("tagname")
+                      checkout([
                         $class: 'GitSCM',
                         branches: [[name: "refs/tags/${tagname}"]],
-                    ])
+                      ])
+                    end
                   end
                   sh "git remote get-url origin >> ../build.current.txt"
                   sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
