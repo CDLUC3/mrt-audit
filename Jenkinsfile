@@ -79,17 +79,10 @@ pipeline {
                   sh "cp build.current.txt WEB-INF"
                   sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${tagname}.war"
                   sh "jar uf mrt-audit-${tagname}.war WEB-INF/build.current.txt"
+                  sh "cp mrt-audit-${tagname}.war ${JENKINS_HOME}/userContent"
                   archiveArtifacts \
                     artifacts: "${tagname}, build.current.txt, mrt-audit-${tagname}.war"
                     onlyIfSuccessful: true
-                  copyArtifacts \
-                    filter: "mrt-audit-${tagname}.war", \
-                    fingerprintArtifacts: true, \
-                    projectName: 'mrt-audit-refactor', \
-                    selector: lastSuccessful(), \
-                    target: "${JENKINS_HOME}/userContent", \
-                    flatten: true
-                } 
             }
         }
     }
