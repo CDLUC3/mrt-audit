@@ -83,11 +83,11 @@ pipeline {
                     artifacts: "${tagname}, build.current.txt, mrt-audit-${tagname}.war"
                     onlyIfSuccessful: true
                   copyArtifacts \
-                    filter: 'mrt-audit-${tagname}.war', \
+                    filter: "mrt-audit-${tagname}.war", \
                     fingerprintArtifacts: true, \
                     projectName: 'mrt-audit-refactor', \
                     selector: lastSuccessful(), \
-                    target: '${JENKINS_HOME}/userContent', \
+                    target: "${JENKINS_HOME}/userContent", \
                     flatten: true
                 } 
             }
