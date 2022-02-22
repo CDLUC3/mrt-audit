@@ -59,11 +59,15 @@ pipeline {
         stage('Build Audit') {
             steps {
                 dir('mrt-audit'){
+                  git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
                   if binding.hasVariable("branch")  
-                    git branch: "${branch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
-                  else
-                    git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
-                    if binding.hasVariable("tagname")
+                    if binding.hasVariable("branch")
+                      checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "${branch}"]],
+                      ])
+                    end
+                  else if binding.hasVariable("tagname")
                       checkout([
                         $class: 'GitSCM',
                         branches: [[name: "refs/tags/${tagname}"]],
