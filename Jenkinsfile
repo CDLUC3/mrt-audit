@@ -75,8 +75,20 @@ pipeline {
             steps {
                 script {
                   sh "cp build.current.txt ${tagname}"
-                  archiveArtifacts artifacts: "${tagname}, build.current.txt, mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war", onlyIfSuccessful: true
-                  copyArtifacts filter: 'mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war', fingerprintArtifacts: true, projectName: 'mrt-audit-refactor', selector: lastSuccessful(), target: '${JENKINS_HOME}/userContent', flatten: true
+                  sh "mkdir -p WEB-INF"
+                  sh "cp build.current.txt WEB-INF"
+                  sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${tagname}.war"
+                  sh "jar uf mrt-audit-${tagname}.war WEB-INF/build.current.txt"
+                  archiveArtifacts \
+                    artifacts: "${tagname}, build.current.txt, mrt-audit-${tagname}.war"
+                    onlyIfSuccessful: true
+                  copyArtifacts \
+                    filter: 'mrt-audit-${tagname}.war', \
+                    fingerprintArtifacts: true, \
+                    projectName: 'mrt-audit-refactor', \
+                    selector: lastSuccessful(), \
+                    target: '${JENKINS_HOME}/userContent', \
+                    flatten: true
                 } 
             }
         }
