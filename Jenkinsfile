@@ -66,8 +66,7 @@ pipeline {
                         $class: 'GitSCM',
                         branches: [[name: "${branch}"]],
                       ])
-                    end
-                  else if binding.hasVariable("tagname")
+                    else if binding.hasVariable("tagname")
                       checkout([
                         $class: 'GitSCM',
                         branches: [[name: "refs/tags/${tagname}"]],
