@@ -92,7 +92,7 @@ pipeline {
             steps {
                 script {
                   if (params.containsKey("branch")) {
-                    def tbrach = sh("echo ${branch##origin\/}")
+                    def tbranch = branch.replaceFirst(/origin\//, '')
                     sh "cp build.current.txt ${tbranch}"
                     sh "mkdir -p WEB-INF"
                     sh "cp build.current.txt WEB-INF"
