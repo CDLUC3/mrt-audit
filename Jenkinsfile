@@ -1,6 +1,8 @@
 @Library('merritt-build-library')
 import org.cdlib.mrt.build.BuildFunctions;
 
+// See https://github.com/CDLUC3/mrt-jenkins/blob/main/src/org/cdlib/mrt/build/BuildFunctions.groovy
+
 pipeline {
     /*
      * Params:
