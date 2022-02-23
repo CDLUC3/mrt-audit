@@ -66,21 +66,22 @@ pipeline {
             steps {
                 dir('mrt-audit'){
                   git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
+                  sh "git remote get-url origin >> ../build.current.txt"
                   script {
                     if (params.containsKey("branch")) {
                       checkout([
                         $class: 'GitSCM',
                         branches: [[name: "${branch}"]],
                       ])
+                      sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags >> ../build.current.txt"
                     } else if (params.containsKey("tagname")) {
                       checkout([
                         $class: 'GitSCM',
                         branches: [[name: "refs/tags/${tagname}"]],
                       ])
+                      sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
                     }
                   }
-                  sh "git remote get-url origin >> ../build.current.txt"
-                  sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
                   sh "git log --pretty=medium -n 1 >> ../build.current.txt"
                   sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install"
                 }
