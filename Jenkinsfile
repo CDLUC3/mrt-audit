@@ -23,6 +23,13 @@ pipeline {
     stages {
         stage('Purge Local') {
             steps {
+                script {
+                  if (params.containsKey("branch")) {
+                      sh "echo 'Building tag ${branch}' > build.current.txt"
+                  } else if (params.containsKey("tagname")) {
+                      sh "echo 'Building tag ${tagname}' > build.current.txt"
+                  }
+                }
                 sh "echo 'Building tag ${tagname}' > build.current.txt"
                 sh "date >> build.current.txt"
                 sh "echo '' >> build.current.txt"
@@ -62,8 +69,6 @@ pipeline {
                   git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
                   script {
                     if (params.containsKey("branch")) {
-                      sh "echo foo"
-                      sh "echo ${branch}"
                       checkout([
                         $class: 'GitSCM',
                         branches: [[name: "${branch}"]],
@@ -93,7 +98,7 @@ pipeline {
                     sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${branch}.war"
                     sh "jar uf mrt-audit-${branch}.war WEB-INF/build.current.txt"
                     archiveArtifacts \
-                      artifacts: "${tagname}, build.current.txt, mrt-audit-${branch}.war"
+                      artifacts: "${branch}, build.current.txt, mrt-audit-${branch}.war"
                       onlyIfSuccessful: true
                   } else {
                     sh "cp build.current.txt ${tagname}"
