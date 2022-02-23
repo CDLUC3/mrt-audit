@@ -1,3 +1,6 @@
+@Library('merritt-build-library')
+import org.cdlib.mrt.build.BuildFunctions;
+
 pipeline {
     /*
      * Params:
@@ -10,8 +13,8 @@ pipeline {
       BRANCH_CLOUD = 'java-refactor'
 
       //working vars
-      m2dir = "${HOME}/.m2-audit"
-      defbranch = "master"
+      M2DIR = "${HOME}/.m2-audit"
+      DEF_BRANCH = "master"
     }
     agent any
 
@@ -23,32 +26,12 @@ pipeline {
     stages {
         stage('Purge Local') {
             steps {
-                script {
-                  if (params.containsKey("branch")) {
-                      sh "echo 'Building branch ${branch}' > build.current.txt"
-                  } else if (params.containsKey("tagname")) {
-                      sh "echo 'Building tag ${tagname}' > build.current.txt"
-                  }
-                }
-                sh "date >> build.current.txt"
-                sh "echo '' >> build.current.txt"
-                sh "echo 'Purge ${m2dir}: ${remove_local_m2}'"
-                script {
-                    if (remove_local_m2.toBoolean()) {
-                        sh "rm -rf ${m2dir}"
-                    }
-                }
+                BuildFunctions.init_build();
             }
         }
         stage('Build Core') {
             steps {
-                dir('mrt-core2') {
-                  git branch: "${env.BRANCH_CORE}", url: 'https://github.com/CDLUC3/mrt-core2.git'
-                  sh "git remote get-url origin >> ../build.current.txt"
-                  sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
-                  sh "git log --pretty=full -n 1 >> ../build.current.txt"
-                  sh "mvn -Dmaven.repo.local=${m2dir} -s ${MAVEN_HOME}/conf/settings.xml clean install -DskipTests"
-                }
+                BuildFunctions.build_core();
             }
         }
         stage('Build Cloud') {
