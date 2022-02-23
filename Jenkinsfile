@@ -60,18 +60,20 @@ pipeline {
             steps {
                 dir('mrt-audit'){
                   git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
-                  if (params.containsKey("branch")) {
-                    sh "echo foo"
-                    sh "echo ${branch}"
-                    checkout([
-                      $class: 'GitSCM',
-                      branches: [[name: "${branch}"]],
-                    ])
-                  } else if (params.containsKey("tagname")) {
-                    checkout([
-                      $class: 'GitSCM',
-                      branches: [[name: "refs/tags/${tagname}"]],
-                    ])
+                  script {
+                    if (params.containsKey("branch")) {
+                      sh "echo foo"
+                      sh "echo ${branch}"
+                      checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "${branch}"]],
+                      ])
+                    } else if (params.containsKey("tagname")) {
+                      checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "refs/tags/${tagname}"]],
+                      ])
+                    }
                   }
                   sh "git remote get-url origin >> ../build.current.txt"
                   sh "git symbolic-ref -q --short HEAD >> ../build.current.txt || git describe --tags --exact-match >> ../build.current.txt"
