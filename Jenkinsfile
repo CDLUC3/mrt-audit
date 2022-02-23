@@ -25,12 +25,11 @@ pipeline {
             steps {
                 script {
                   if (params.containsKey("branch")) {
-                      sh "echo 'Building tag ${branch}' > build.current.txt"
+                      sh "echo 'Building branch ${branch}' > build.current.txt"
                   } else if (params.containsKey("tagname")) {
                       sh "echo 'Building tag ${tagname}' > build.current.txt"
                   }
                 }
-                sh "echo 'Building tag ${tagname}' > build.current.txt"
                 sh "date >> build.current.txt"
                 sh "echo '' >> build.current.txt"
                 sh "echo 'Purge ${m2dir}: ${remove_local_m2}'"
