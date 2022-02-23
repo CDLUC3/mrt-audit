@@ -27,7 +27,7 @@ pipeline {
         stage('Purge Local') {
             steps {
                 script {
-                  new BuildFunctions().init_build();
+                  BuildFunctions.init_build();
                 }
             }
         }
@@ -35,7 +35,8 @@ pipeline {
             steps {
                 dir('mrt-core2') {
                   script {
-                    new BuildFunctions().build_core();
+                    BuildFunctions.build_core();
+                    //BuildFunctions.build_library('https://github.com/CDLUC3/mrt-core2.git', env.BRANCH_CORE, '-DskipTests')
                   }
                 }
             }
