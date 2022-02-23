@@ -60,15 +60,14 @@ pipeline {
             steps {
                 dir('mrt-audit'){
                   git branch: "${env.defbranch}", url: 'https://github.com/CDLUC3/mrt-audit.git'
-                  if binding.hasVariable("branch")  
+                  if params.branch 
                     sh "echo foo"
                     sh "echo ${branch}"
-                    sh "echo ${branch.replaceAll(/origin\//, '')}"
                     checkout([
                       $class: 'GitSCM',
                       branches: [[name: "${branch.replaceAll(/origin\//, '')}"]],
                     ])
-                  else if binding.hasVariable("tagname")
+                  else if params.tagname
                     checkout([
                       $class: 'GitSCM',
                       branches: [[name: "refs/tags/${tagname}"]],
