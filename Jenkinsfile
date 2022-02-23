@@ -26,12 +26,14 @@ pipeline {
     stages {
         stage('Purge Local') {
             steps {
-                BuildFunctions.init_build();
+                new BuildFunctions().init_build();
             }
         }
         stage('Build Core') {
             steps {
-                BuildFunctions.build_core();
+                dir('mrt-core2') {
+                    new BuildFunctions().build_core();
+                }
             }
         }
         stage('Build Cloud') {
