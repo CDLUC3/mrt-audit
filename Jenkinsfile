@@ -98,7 +98,7 @@ pipeline {
                     sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${branch##origin\/}.war"
                     sh "jar uf mrt-audit-${branch##origin\/}.war WEB-INF/build.current.txt"
                     archiveArtifacts \
-                      artifacts: "${branch}, build.current.txt, mrt-audit-${branch##origin\/}.war"
+                      artifacts: "${branch##origin\/}, build.current.txt, mrt-audit-${branch##origin\/}.war"
                       onlyIfSuccessful: true
                   } else {
                     sh "cp build.current.txt ${tagname}"
