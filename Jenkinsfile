@@ -86,15 +86,27 @@ pipeline {
         stage('Archive Resources') { // for display purposes
             steps {
                 script {
-                  sh "cp build.current.txt ${tagname}"
-                  sh "mkdir -p WEB-INF"
-                  sh "cp build.current.txt WEB-INF"
-                  sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${tagname}.war"
-                  sh "jar uf mrt-audit-${tagname}.war WEB-INF/build.current.txt"
-                  sh "cp mrt-audit-${tagname}.war ${JENKINS_HOME}/userContent"
-                  archiveArtifacts \
-                    artifacts: "${tagname}, build.current.txt, mrt-audit-${tagname}.war"
-                    onlyIfSuccessful: true
+                  if (params.containsKey("branch")) {
+                    sh "cp build.current.txt ${branch}"
+                    sh "mkdir -p WEB-INF"
+                    sh "cp build.current.txt WEB-INF"
+                    sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${branch}.war"
+                    sh "jar uf mrt-audit-${branch}.war WEB-INF/build.current.txt"
+                    archiveArtifacts \
+                      artifacts: "${tagname}, build.current.txt, mrt-audit-${branch}.war"
+                      onlyIfSuccessful: true
+                  } else {
+                    sh "cp build.current.txt ${tagname}"
+                    sh "mkdir -p WEB-INF"
+                    sh "cp build.current.txt WEB-INF"
+                    sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${tagname}.war"
+                    sh "jar uf mrt-audit-${tagname}.war WEB-INF/build.current.txt"
+                    sh "cp mrt-audit-${tagname}.war ${JENKINS_HOME}/userContent"
+                    archiveArtifacts \
+                      artifacts: "${tagname}, build.current.txt, mrt-audit-${tagname}.war"
+                      onlyIfSuccessful: true
+                  }
+
                 }
             }
         }
