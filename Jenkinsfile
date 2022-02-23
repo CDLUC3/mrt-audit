@@ -92,13 +92,14 @@ pipeline {
             steps {
                 script {
                   if (params.containsKey("branch")) {
-                    sh "cp build.current.txt ${branch##origin\/}"
+                    def tbrach = sh("echo ${branch##origin\/}")
+                    sh "cp build.current.txt ${tbranch}"
                     sh "mkdir -p WEB-INF"
                     sh "cp build.current.txt WEB-INF"
-                    sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${branch##origin\/}.war"
-                    sh "jar uf mrt-audit-${branch##origin\/}.war WEB-INF/build.current.txt"
+                    sh "cp mrt-audit/audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war mrt-audit-${tbranch}.war"
+                    sh "jar uf mrt-audit-${tbranch}.war WEB-INF/build.current.txt"
                     archiveArtifacts \
-                      artifacts: "${branch##origin\/}, build.current.txt, mrt-audit-${branch##origin\/}.war"
+                      artifacts: "${tbranch}, build.current.txt, mrt-audit-${tbranch}.war"
                       onlyIfSuccessful: true
                   } else {
                     sh "cp build.current.txt ${tagname}"
