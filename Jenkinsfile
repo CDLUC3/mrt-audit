@@ -63,7 +63,10 @@ pipeline {
             steps {
                 dir('mrt-audit'){
                   script {
-                    new BuildFunctions().build_war('https://github.com/CDLUC3/mrt-audit.git')
+                    new BuildFunctions().build_war(
+                      'https://github.com/CDLUC3/mrt-audit.git',
+                      ''
+                    )
                   }
                 }
             }
