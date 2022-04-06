@@ -32,18 +32,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk</artifactId>
-      <version>1.11.438</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.9.7</version>
-    </dependency>
-
-    <dependency>
        <groupId>com.zaxxer</groupId>
        <artifactId>HikariCP</artifactId>
        <version>4.0.3</version>
@@ -76,21 +64,17 @@
     </dependency>
 
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.18</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.cdlib.mrt</groupId>
       <artifactId>mrt-auditconfpub</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>runtime</scope>
     </dependency>
 
     <dependency>
       <groupId>org.cdlib.mrt</groupId>
       <artifactId>mrt-cloudconf</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>runtime</scope>
     </dependency>
 
     <dependency>
@@ -118,20 +102,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-servlet</artifactId>
-      <version>2.25.1</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-multipart</artifactId>
-      <version>2.25.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-client</artifactId>
       <version>2.25.1</version>
     </dependency>
 
@@ -155,6 +127,18 @@
 
 </project>
 
+
+<!--
+[INFO] - maven-dependency-plugin:2.1:analyze (default-cli) @ mrt-auditsrcpub -
+[WARNING] Unused declared dependencies found:
+[WARNING]    com.amazonaws:aws-java-sdk:jar:1.11.438:compile
+[WARNING]    com.fasterxml.jackson.core:jackson-core:jar:2.9.7:compile
+[WARNING]    mysql:mysql-connector-java:jar:8.0.18:compile
+[WARNING]    org.cdlib.mrt:mrt-auditconfpub:jar:1.0-SNAPSHOT:compile
+[WARNING]    org.cdlib.mrt:mrt-cloudconf:jar:1.0-SNAPSHOT:compile
+[WARNING]    org.glassfish.jersey.containers:jersey-container-servlet:jar:2.25.1:compile
+[WARNING]    org.glassfish.jersey.core:jersey-client:jar:2.25.1:compile
+-->
 
 
 <!-- commented out dependencies
