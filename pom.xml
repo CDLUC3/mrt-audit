@@ -21,21 +21,11 @@
       </profile>
   </profiles>
 
-    <modules>
-        <module>audit-conf</module>
-        <module>audit-src</module>
-        <module>audit-war</module>
-    </modules>
-
-<!--
-  <dependencies>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-      <version>1.1</version>
-    </dependency>
-  </dependencies>
--->
+  <modules>
+    <module>audit-conf</module>
+    <module>audit-src</module>
+    <module>audit-war</module>
+  </modules>
 
 </project>
 
