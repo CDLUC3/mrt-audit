@@ -12,7 +12,7 @@ pipeline {
     environment {      
       //Branch/tag names to incorporate into the build.  Create one var for each repo.
       BRANCH_CORE = 'main'
-      BRANCH_CLOUD = 'java-refactor'
+      BRANCH_CLOUD = 'main'
 
       //working vars
       M2DIR = "${HOME}/.m2-audit"
