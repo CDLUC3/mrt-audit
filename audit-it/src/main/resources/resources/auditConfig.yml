@@ -1,0 +1,43 @@
+which-audit-info: audit-info
+  
+audit-info:
+  service:
+    threadPool: "1"
+    nodePath: "yaml:"
+    auditQualify: "NONE"
+    intervalDays: "0"
+    queueSleepMs: "5000"
+    queueCapacity: "10"
+    sizeChecksumBuffer: 32000000
+    
+  state:
+    id: audit
+    name: UC3
+    description: "UC3 audit micro-service"
+    version: "audit version"
+    serviceScheme: "Fixity/0.2/1.0"
+    
+  cleanup:
+    subject: "Merritt Audit Cleanup"
+    from: "uc3staff@ucop.edu"
+    to: "NONE"
+    msg: "Merritt Audit Cleanup Stage"
+
+  fileLogger:
+    messageMaximumLevel: 5
+    messageMaximumError: 10
+    path: /tmp
+    name: audit
+    qualifier: yyMMdd
+    
+  mail:
+    smtp: "smtp.ucop.edu"
+    from: "uc3staff@ucop.edu"
+
+  db:
+    adapter: mysql2
+    host: mrt-it-database
+    name: inv
+    user: user
+    password: password
+    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC"   # schema won't load if it's utf8mb4

@@ -26,6 +26,7 @@
         <module>audit-conf</module>
         <module>audit-src</module>
         <module>audit-war</module>
+        <module>audit-it</module>
     </modules>
 
   <dependencies>
@@ -37,4 +38,3 @@
   </dependencies>
 
 </project>
-
