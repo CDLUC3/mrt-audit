@@ -6,7 +6,7 @@ audit-info:
     nodePath: "yaml:"
     auditQualify: "NONE"
     intervalDays: "0"
-    queueSleepMs: "5000"
+    queueSleepMs: "1000"
     queueCapacity: "10"
     sizeChecksumBuffer: 32000000
     

@@ -108,7 +108,7 @@
                             <alias>minio-server</alias>
                           </network>
                           <ports>
-                            <port>minio-server.port:9000</port>
+                             <port>minio-server.port:9000</port>
                           </ports>
                           <wait>
                             <time>2000</time>
@@ -133,7 +133,7 @@
                             <port>mrt-it-database.port:3306</port>
                           </ports>
                           <wait>
-                            <time>2000</time>
+                            <time>10000</time>
                           </wait>
                         </run>
                       </image>
@@ -149,7 +149,7 @@
                             <port>it-server.port:8080</port>
                           </ports>
                           <wait>
-                            <time>1000</time>
+                            <time>2000</time>
                           </wait>
                           <volumes>
                             <bind>

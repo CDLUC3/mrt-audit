@@ -33,6 +33,7 @@ services:
       merrittnet:
     depends_on:
     - mrt-it-database
+    - minio-server
     # Allow debugger to be attached to the server
     entrypoint: ["catalina.sh", "jpda", "run"]
   minio-server:

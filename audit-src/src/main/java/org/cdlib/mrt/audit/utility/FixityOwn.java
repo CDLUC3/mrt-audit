@@ -177,7 +177,7 @@ public class FixityOwn
             if (DEBUG) System.out.println("own sql:" + sql);
 
             Properties [] props = FixityDBUtil.cmd(ownConnect, sql, logger);
-            if ((props == null) || (props.length==0)) return null;
+            if ((props == null) || (props.length==0)) return new LinkedList<InvAudit>();
             String concatid = "";
             for (Properties prop : props) {
                 InvAudit audit = new InvAudit(prop, logger);

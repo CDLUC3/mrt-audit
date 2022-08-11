@@ -126,6 +126,7 @@ public class JerseyFixity
      * @throws TException 
      */
     @GET
+    @Deprecated
     @Path("url/{url}")
     public Response callGetUrlEntry(
             @PathParam("url") String url,
@@ -182,6 +183,7 @@ public class JerseyFixity
   
 
     @POST
+    @Deprecated
     @Path("cleanup")
     public Response callCleanup(
             @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
@@ -193,6 +195,7 @@ public class JerseyFixity
     }  
     
     @POST
+    @Deprecated
     @Path("report")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response callGetReport(

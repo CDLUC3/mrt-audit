@@ -34,16 +34,13 @@ import org.junit.Test;
 public class ServiceDriverIT {
         private int port = 8080;
         private int dbport = 9999;
-        private int primaryNode = 7777;
-        private int replNode = 8888;
         private String cp = "mrtaudit";
-        String[] ARKS = {"ark:/1111/2222", "ark:/1111/3333", "ark:/1111/4444" };
 
         private String connstr;
         private String user = "user";
         private String password = "password";
 
-        public ServiceDriverIT() throws IOException, JSONException, SQLException {
+        public ServiceDriverIT() throws IOException, JSONException, SQLException, InterruptedException {
                 try {
                         port = Integer.parseInt(System.getenv("it-server.port"));
                         dbport = Integer.parseInt(System.getenv("mrt-it-database.port"));
@@ -51,19 +48,99 @@ public class ServiceDriverIT {
                         System.err.println("it-server.port not set, defaulting to " + port);
                 }
                 connstr = String.format("jdbc:mysql://localhost:%d/inv?characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&serverTimezone=UTC", dbport);
-                initService();
+                //System.out.println(connstr);
+                checkInvDatabase("select 1", 1);
+        }
+
+
+        public String testRunning() throws HttpResponseException, IOException, JSONException {
+                String url = String.format("http://localhost:%d/%s/state?t=json", port, cp);
+                return testRunning(getJsonContent(url, 200));
+        }
+
+        public String testRunning(JSONObject json) throws HttpResponseException, IOException, JSONException {
+                //System.out.println(json.toString(2));
+                if (json.has("fix:fixityServiceState")){
+                        return json.getJSONObject("fix:fixityServiceState").getString("fix:status");
+                }
+                return "";
         }
 
         @Test
-        public void SimpleTest() throws IOException, JSONException {
-                String url = String.format("http://localhost:%d/%s/state?t=json", port, cp);
-                JSONObject json = getJsonContent(url, 200);
-                System.out.println(json.toString(2));
-                assertTrue(json.has("fix:fixityServiceState"));
-                assertEquals("running", json.getJSONObject("fix:fixityServiceState").get("fix:status"));       
+        public void simpleAuditTest() throws IOException, JSONException, SQLException, InterruptedException {
+                int count = getDatabaseVal(audit_count_verified_sql, -1);
+                if (count > 0) {
+                        runUpdate(clear_audit_sql);
+                }
+                assertEquals(0, getDatabaseVal(audit_count_verified_sql, -1));
+                String s = testRunning();
+                if (!(s.equals("running") || s.equals("unknown"))) {
+                        //reinit of service may break running threads
+                        initService();
+                }
+                s = testRunning();
+                assertTrue(s.equals("running") || s.equals("unknown"));      
+
+                checkReplicationComplete();
+
+                runUpdate(clear_audit_sql);
+                count = getDatabaseVal(audit_count_verified_sql, -1);
+                assertEquals(0, count);
         }
 
-        public void initService() throws IOException, JSONException, SQLException {
+        @Test
+        public void pauseUnpause() throws IOException, JSONException, SQLException, InterruptedException {
+                String s = testRunning();
+                if (!(s.equals("running") || s.equals("unknown"))) {
+                        //reinit of service may break running threads
+                        initService();
+                }
+                s = testRunning();
+                assertTrue(s.equals("running") || s.equals("unknown"));      
+                
+                pauseService();
+                s = testRunning();
+                assertTrue(s.equals("pause") || s.equals("shuttingdown"));      
+
+                initService();
+                s = testRunning();
+                assertTrue(s.equals("running") || s.equals("unknown"));      
+        }
+
+        @Test
+        public void runAuditTwice() throws SQLException, InterruptedException, IOException, JSONException {
+                simpleAuditTest();
+                simpleAuditTest();
+        }
+
+        public void checkReplicationComplete() throws SQLException, InterruptedException {
+                int orig = getDatabaseVal(audit_count_sql, -1);
+                //allow time for the replication to complete
+                int count = getDatabaseVal(audit_count_verified_sql, -1);
+                for(int i=0; i < 15 && count != orig; i++) {
+                        Thread.sleep(5000);
+                        count = getDatabaseVal(audit_count_verified_sql, -1);
+                        //System.out.println(String.format("%d %d %d", i, count, orig));
+                }
+                assertEquals(orig, count);
+        }
+
+        public void pauseService() throws IOException, JSONException, SQLException, InterruptedException {
+                String url = String.format("http://localhost:%d/%s/service/pause?t=json", port, cp);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                        HttpPost post = new HttpPost(url);
+                        HttpResponse response = client.execute(post);
+                        assertEquals(200, response.getStatusLine().getStatusCode());
+                        String s = new BasicResponseHandler().handleResponse(response).trim();
+                        assertFalse(s.isEmpty());
+                        JSONObject json = new JSONObject(s);
+                        assertTrue(json.has("fix:fixityServiceState"));
+                }
+                String s = testRunning();
+                assertTrue(s.equals("pause") || s.equals("shuttingdown"));      
+}
+
+        public void initService() throws IOException, JSONException, SQLException, InterruptedException {
                 String url = String.format("http://localhost:%d/%s/service/start?t=json", port, cp);
                 try (CloseableHttpClient client = HttpClients.createDefault()) {
                         HttpPost post = new HttpPost(url);
@@ -71,10 +148,11 @@ public class ServiceDriverIT {
                         assertEquals(200, response.getStatusLine().getStatusCode());
                         String s = new BasicResponseHandler().handleResponse(response).trim();
                         assertFalse(s.isEmpty());
-
-                        JSONObject json =  new JSONObject(s);
-                        assertNotNull(json);
+                        JSONObject json = new JSONObject(s);
+                        assertTrue(json.has("fix:fixityServiceState"));
                 }
+                String s = testRunning();
+                assertTrue(s.equals("running") || s.equals("unknown"));      
         }
 
         public String getContent(String url, int status) throws HttpResponseException, IOException {
@@ -99,6 +177,17 @@ public class ServiceDriverIT {
                 JSONObject json = s.isEmpty() ? new JSONObject() : new JSONObject(s);
                 assertNotNull(json);
                 return json;
+        }
+
+        private void checkInvDatabase(String sql, int value) throws SQLException {
+                try(Connection con = DriverManager.getConnection(connstr, user, password)){
+                        try (PreparedStatement stmt = con.prepareStatement(sql)){
+                                ResultSet rs=stmt.executeQuery();
+                                while(rs.next()) {
+                                        assertEquals(value, rs.getInt(1));  
+                                }  
+                        }
+                }
         }
 
         public void checkInvDatabase(String sql, String message, int n, int value) throws SQLException {
@@ -126,10 +215,9 @@ public class ServiceDriverIT {
                 }
         }
 
-        public int getDatabaseVal(String sql, int n, int value) throws SQLException {
+        public int getDatabaseVal(String sql, int value) throws SQLException {
                 try(Connection con = DriverManager.getConnection(connstr, user, password)){
                         try (PreparedStatement stmt = con.prepareStatement(sql)){
-                                stmt.setInt(1, n);
                                 ResultSet rs=stmt.executeQuery();
                                 while(rs.next()) {
                                         return rs.getInt(1);  
@@ -146,5 +234,10 @@ public class ServiceDriverIT {
                         }
                 }
         }
+
+        public String clear_audit_sql = "update inv_audits set verified=null, status='unknown'";
+        public String audit_count_sql = "select count(*) from inv_audits";
+        public String audit_count_verified_sql = 
+          "select count(*) from inv_audits where status='verified' and verified is not null";
 
 }
