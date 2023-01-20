@@ -93,7 +93,8 @@ public class FixityServiceConfig
     protected FixityServiceStateManager serviceStateManager = null;
     protected FixityState fixityState = null;
     protected RewriteEntry rewriteEntry = null;
-    protected static Integer sizeChecksumBuffer = null;
+    protected static Integer sizeChecksumBuffer = null;    
+    protected static final DateState serviceStartTime = new DateState();
     
     private static class Test{ };
     
@@ -712,5 +713,8 @@ public class FixityServiceConfig
         }
     }
 
+    public static DateState getServiceStartTime() {
+        return serviceStartTime;
+    }
     
 }

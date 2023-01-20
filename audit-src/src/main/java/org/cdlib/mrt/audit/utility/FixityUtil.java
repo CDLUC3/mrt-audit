@@ -233,6 +233,10 @@ public class FixityUtil
                 addStatusUnverified(entry, rinf);
                 return;
 
+            } catch (TException tex) {
+                addStatusUnverified(entry, tex);
+                return;
+
             } catch (Exception ex) {
                 throw ex;
             }

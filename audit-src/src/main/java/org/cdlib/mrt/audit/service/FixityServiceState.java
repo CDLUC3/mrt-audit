@@ -433,4 +433,8 @@ public class FixityServiceState
         if (StringUtil.isAllBlank(capacityS)) return;
         this.queueCapacity = Integer.parseInt(capacityS);
     }
+
+    public static DateState getServiceStartTime() {
+        return FixityServiceConfig.getServiceStartTime();
+    }
 }

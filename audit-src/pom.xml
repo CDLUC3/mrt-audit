@@ -7,6 +7,18 @@
   <version>1.0-SNAPSHOT</version>
   <name>UC3-mrtAuditSrcPub</name>
   <url>http://uc3.cdlib.org</url>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.cdlib.mrt</groupId>
+        <artifactId>mrt-reflectoring-bom</artifactId>
+        <version>1.0.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <!-- force UTF-8 -->
   <properties>
@@ -31,35 +43,10 @@
   </build>
 
   <dependencies>
-      
-    <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-servlet</artifactId>
-        <version>2.25.1</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.glassfish.jersey.media</groupId>
-        <artifactId>jersey-media-multipart</artifactId>
-        <version>2.25.1</version>
-    </dependency>
-    
-
-    <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>2.25.1</version>
-    </dependency>
-
-    <dependency>
-        <groupId>javax.mail</groupId>
-        <artifactId>mail</artifactId>
-        <version>1.4.1</version>
-    </dependency>
 
       <dependency>
           <groupId>org.cdlib.mrt</groupId>
-        <artifactId>mrt-s3srcpub</artifactId>
+          <artifactId>mrt-auditconfpub</artifactId>
           <version>1.0-SNAPSHOT</version>
       </dependency>
       
@@ -74,76 +61,53 @@
           <artifactId>mrt-core</artifactId>
           <version>2.0-SNAPSHOT</version>
       </dependency>
-
+      
       <dependency>
           <groupId>org.cdlib.mrt</groupId>
-          <artifactId>mrt-auditconfpub</artifactId>
+          <artifactId>mrt-s3srcpub</artifactId>
           <version>1.0-SNAPSHOT</version>
       </dependency>
-
-        <!--dependency>
-          <groupId>javax.ws.rs</groupId>
-          <artifactId>jsr311-api</artifactId>
-          <version>1.1</version>
-        </dependency-->
-        
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <!--version>5.1.38</version-->
-            <version>8.0.28</version>
-        </dependency>
 
         <dependency>
            <groupId>com.zaxxer</groupId>
            <artifactId>HikariCP</artifactId>
-           <version>4.0.3</version>
            <scope>compile</scope>
         </dependency>
 
-<!--
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.2.3</version>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.2.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.2.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.38</version>
-        </dependency>
-
-    <dependency>
-        <groupId>com.jolbox</groupId>
-        <artifactId>bonecp</artifactId>
-        <version>0.7.1-rc3</version>
-    </dependency>
--->
 
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
         </dependency>
 
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-          <version>4.5</version>
           <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+             
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
         </dependency>
     
   </dependencies>
