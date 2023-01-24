@@ -67,6 +67,13 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.3.2</version>
+        <configuration>
+          <packagingExcludes>WEB-INF/lib/slf4j-log4j12-1.5.6.jar,WEB-INF/lib/mrt-jena-2.0-SNAPSHOT.jar</packagingExcludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -140,6 +147,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
