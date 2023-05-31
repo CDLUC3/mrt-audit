@@ -30,6 +30,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.cdlib.mrt.audit.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 import org.cdlib.mrt.audit.action.FixityValidationWrapper;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -402,6 +404,14 @@ public class RunFixity implements Runnable
                     );
             //System.out.println(msg);
             logger.logMessage(msg, 1, true);
+            ThreadContext.put("capacity", Integer.toString(capacity));
+            ThreadContext.put("sleepTime", Long.toString(sleepTime));
+            ThreadContext.put("verified", Integer.toString(verifiedList.size()));
+            ThreadContext.put("non-verified", Integer.toString(capacity - verifiedList.size()));
+            ThreadContext.put("processMs", Long.toString(stopMs - startMs));
+            ThreadContext.put("runVerifiedMs", Long.toString(stopMs - startCompleteMs));
+            ThreadContext.put("bytes", Long.toString(bytes));
+            LogManager.getLogger().info("Fixity Batch Compelete");
             
             log("************Termination of threads");
 
