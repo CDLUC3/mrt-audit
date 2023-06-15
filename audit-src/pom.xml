@@ -18,27 +18,27 @@
         <scope>import</scope>
       </dependency>
     </dependencies>
-  </dependencyManagement>
-
-  <!-- force UTF-8 -->
-  <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <java.compiler>1.8</java.compiler>
-  </properties>
+  </dependencyManagement>  
+    
+  <parent>
+    <groupId>org.cdlib.mrt</groupId>
+    <artifactId>mrt-parent-properties</artifactId>
+    <version>1.0.0</version>
+  </parent>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.9.0</version>
-        <configuration>
-            <source>${java.compiler}</source>
-            <target>${java.compiler}</target>
-            <compilerArgument>${compilerArgument}</compilerArgument>
-            <!--compilerArgument>-Xlint:unchecked</compilerArgument-->
-        </configuration>
-      </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven.compiler.plugin.version}</version>
+            <configuration>
+                <source>${maven.compiler.plugin.java}</source>
+                <target>${maven.compiler.plugin.java}</target>
+                <compilerArgument>${compilerArgument}</compilerArgument>
+        <!--compilerArgument>-Xlint:unchecked</compilerArgument-->
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 
@@ -155,21 +155,12 @@
             <artifactId>ecs-logging-core</artifactId>
             <scope>runtime</scope>
         </dependency>
+        
         <dependency>
             <groupId>co.elastic.logging</groupId>
             <artifactId>log4j2-ecs-layout</artifactId>
             <scope>runtime</scope>
         </dependency>
       </dependencies>
-    <reporting>
-        <outputDirectory>/uc3qa/nexus34211/tomcat/webapps/report/mrt/core</outputDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.0.1</version>
-            </plugin>
-        </plugins>
-   </reporting>
 
 </project>
