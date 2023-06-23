@@ -7,20 +7,13 @@
   <version>1.0-SNAPSHOT</version>
   <name>UC3-mrtAuditGit</name>
   <url>http://uc3.cdlib.org</url>
-
-
-  <!-- let profiles determine which conf module to run -->
-  <profiles>
-      <profile>
-        <id>uc3</id>
-        <activation>
-          <activeByDefault>true</activeByDefault>
-        </activation>
-        <properties>
-           <confModule>audit-conf</confModule>
-        </properties>
-      </profile>
-  </profiles>
+  
+  
+  <parent>
+    <groupId>org.cdlib.mrt</groupId>
+    <artifactId>mrt-parent-properties</artifactId>
+    <version>1.0.0</version>
+  </parent>
 
     <modules>
         <module>audit-conf</module>
@@ -28,13 +21,5 @@
         <module>audit-war</module>
         <module>audit-it</module>
     </modules>
-
-  <dependencies>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-      <version>1.1</version>
-    </dependency>
-  </dependencies>
 
 </project>

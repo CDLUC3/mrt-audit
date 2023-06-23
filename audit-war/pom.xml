@@ -20,10 +20,15 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+    
+  <parent>
+    <groupId>org.cdlib.mrt</groupId>
+    <artifactId>mrt-parent-properties</artifactId>
+    <version>1.0.0</version>
+  </parent>
 
   <!-- force UTF-8 -->
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <propertyDir>test</propertyDir>
   </properties>
 
