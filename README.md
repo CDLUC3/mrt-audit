@@ -13,7 +13,36 @@ The work that this service performs is determined by querying the Merritt Invent
 - [Merritt Audit Service](https://github.com/CDLUC3/mrt-doc/blob/main/doc/Merritt-audit-service-latest.pdf)
 
 ## Component Diagram
-[![Flowchart](https://github.com/CDLUC3/mrt-doc/raw/main/diagrams/audit.mmd.svg)](https://cdluc3.github.io/mrt-doc/diagrams/audit)
+```mermaid
+%%{init: {'theme': 'neutral', 'securityLevel': 'loose', 'themeVariables': {'fontFamily': 'arial'}}}%%
+graph TD
+  RDS[(Inventory DB)]
+  AUDIT(AUDIT - Fixity Check)
+  click AUDIT href "https://github.com/CDLUC3/mrt-audit" "source code"
+
+  subgraph flowchart
+    subgraph cloud_storage
+      CLDS3[/AWS S3/]
+      CLDSDSC[/SDSC Minio/]
+      CLDWAS[/Wasabi/]
+      CLDGLC[/Glacier/]
+    end
+
+    RDS --> |acquire work| AUDIT
+    AUDIT --> |fixity check| CLDS3
+    AUDIT --> |metadata check| CLDGLC
+    AUDIT --> |fixity check| CLDWAS
+    AUDIT --> |fixity check| CLDSDSC
+    AUDIT -.-> |record fixity| RDS
+  end
+  style CLDS3 fill:#77913C
+  style CLDGLC fill:#77913C
+  style CLDSDSC fill:#77913C
+  style CLDWAS fill:#77913C
+  style RDS fill:#F68D2F
+
+  style AUDIT stroke:red,stroke-width:4px
+```
 
 ## Dependencies
 
