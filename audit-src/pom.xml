@@ -33,10 +33,6 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>${maven.compiler.plugin.version}</version>
             <configuration>
-                <source>${maven.compiler.plugin.java}</source>
-                <target>${maven.compiler.plugin.java}</target>
-                <compilerArgument>${compilerArgument}</compilerArgument>
-        <!--compilerArgument>-Xlint:unchecked</compilerArgument-->
             </configuration>
         </plugin>
     </plugins>
@@ -135,6 +131,11 @@
       <dependency>
           <groupId>org.glassfish.jersey.media</groupId>
           <artifactId>jersey-media-multipart</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.inject</groupId>
+        <artifactId>jersey-hk2</artifactId>
+        <scope>runtime</scope>
       </dependency>
 
        <dependency>
