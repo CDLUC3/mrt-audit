@@ -37,6 +37,7 @@ import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
+import org.cdlib.mrt.log.utility.Log4j2Util;
 
 /**
  * Format container class for Fixity Service
@@ -436,5 +437,14 @@ public class FixityServiceState
 
     public static DateState getServiceStartTime() {
         return FixityServiceConfig.getServiceStartTime();
+    }
+    
+    public static String getLogRootLevel()
+    {
+        try {
+            return Log4j2Util.getRootLevel();
+        } catch (Exception  ex) {
+            return "Not found";
+        }
     }
 }
