@@ -43,6 +43,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.server.CloseableService;
@@ -54,6 +56,7 @@ import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.service.FixityEntriesState;
 import org.cdlib.mrt.audit.service.FixityMRTServiceInf;
+import org.cdlib.mrt.log.utility.Log4j2Util;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -76,6 +79,8 @@ public class JerseyFixity
     protected static final boolean DEBUG = false;
     protected static final String NL = System.getProperty("line.separator");
 
+
+    private static final Logger log4j = LogManager.getLogger();
     /**
      * Get state information about a specific node
      * @param nodeID node identifier
@@ -162,6 +167,36 @@ public class JerseyFixity
 
         } else  {
             throw new TException.REQUEST_ELEMENT_UNSUPPORTED("Set fixity state value not recognized:" + setType);
+        }
+    }
+    
+    @POST
+    @Path("reset")
+    public Response callResetState(
+            @DefaultValue("-none-") @QueryParam("log4jlevel") String log4jlevel,
+            @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        try {
+            log4j.info("getResetState entered:"
+                    + " - formatType=" + formatType
+                    + " - log4jlevel=" + log4jlevel
+                    );
+            if (!log4jlevel.equals("-none-")) {
+                Log4j2Util.setRootLevel(log4jlevel);
+            }
+            return getServiceState(formatType, cs, sc);
+
+        } catch (TException tex) {
+            log4j.error(tex.toString(), tex);
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            log4j.error(ex.toString(), ex);
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
 
@@ -311,6 +346,7 @@ public class JerseyFixity
             FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
             logger = fixityService.getLogger();
 
+            log4j.info("runFixity");
             StateInf responseState = fixityService.setFixityRun();
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
@@ -424,6 +460,7 @@ public class JerseyFixity
             logger = fixityService.getLogger();
 
             StateInf responseState = fixityService.setFixityStop();
+            log4j.info("stopFixity");
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
@@ -459,6 +496,7 @@ public class JerseyFixity
             logger = fixityService.getLogger();
 
             StateInf responseState = fixityService.setShutdown();
+            log4j.info("shutdownFixity");
             return getStateResponse(responseState, formatType, logger, cs, sc);
 
         } catch (TException tex) {
@@ -486,6 +524,7 @@ public class JerseyFixity
             FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
             logger = fixityService.getLogger();
 
+            log4j.info("pauseFixity");
             StateInf responseState = fixityService.setPause();
             return getStateResponse(responseState, formatType, logger, cs, sc);
 

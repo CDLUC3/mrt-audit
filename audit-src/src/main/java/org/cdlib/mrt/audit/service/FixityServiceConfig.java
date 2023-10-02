@@ -46,6 +46,8 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.formatter.FormatterAbs;
@@ -74,6 +76,7 @@ public class FixityServiceConfig
     private static final String MESSAGE = NAME + ": ";
     private static final boolean DEBUG = false;
     
+    private static final Logger log4j = LogManager.getLogger();
     protected JSONObject stateJSON = null;
     protected JSONObject serviceJSON = null;
     // protected JSONObject periodicReportJSON = null;
@@ -636,6 +639,13 @@ public class FixityServiceConfig
                 };
         CloudChecksum ccsum = CloudChecksum.getChecksums(types, service, bucket, key, sizeChecksumBuffer);
         return ccsum;
+    }
+    
+    public static NodeIO.AccessKey getCloudChecksumAccessKey(String fixityURL)
+        throws TException
+    {
+        NodeIO.AccessKey accessKey = nodeIO.getAccessKey(fixityURL);
+        return accessKey;
     }
 
     public FixityItemDB getDb() {

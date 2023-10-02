@@ -42,9 +42,12 @@ import java.util.concurrent.Callable;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
+import org.cdlib.mrt.audit.logging.LogAuditEntry;
 import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.s3.service.NodeIO;
 import org.cdlib.mrt.s3.tools.CloudChecksum;
@@ -71,6 +74,7 @@ public class FixityUtil
     protected static final String NAME = "FixityUtil";
     protected static final String MESSAGE = NAME + ": ";
 
+    private static final Logger log4j = LogManager.getLogger();
     protected static final boolean DEBUG = false;
     public static final String DBDATEPATTERN = "yyyy-MM-dd HH:mm:ss";
     protected static final String NL = System.getProperty("line.separator");
@@ -182,6 +186,7 @@ public class FixityUtil
             LoggerInf logger)
         throws TException
    {
+        Long durationMs = null;
         MessageDigest digest = entry.getDigest();
         if (digest == null) {
             throw new TException.INVALID_OR_MISSING_PARM(MESSAGE + "runTest - Exception: no digest provided");
@@ -243,6 +248,7 @@ public class FixityUtil
             long startTime = System.currentTimeMillis();
             cc.process();
             long procTime = System.currentTimeMillis() - startTime;
+            durationMs = procTime;
             CloudChecksum.Digest test = cc.getDigest(checksumType);
             CloudChecksum.CloudChecksumResult fixityResult
                     = cc.validateSizeChecksum(checksum, checksumType, fileSize, logger);
@@ -271,6 +277,10 @@ public class FixityUtil
             }
             throw new TException.GENERAL_EXCEPTION(ex);
 
+        } finally {
+            LogAuditEntry logEntry = LogAuditEntry.getLogInvPrimary(durationMs, entry);
+            logEntry.addEntry();
+            
         }
     }
     

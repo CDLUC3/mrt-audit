@@ -29,6 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 package org.cdlib.mrt.audit.handler;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.utility.FixityUtil;
 import org.cdlib.mrt.core.FixityStatusType;
@@ -50,6 +52,7 @@ public class FixityHandlerStandard
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
 
+    private static final Logger log4j = LogManager.getLogger();
     protected FixityHandlerStandard(
             FixityMRTEntry entry,
             LoggerInf logger)
@@ -122,6 +125,10 @@ public class FixityHandlerStandard
             throw new TException.GENERAL_EXCEPTION(ex);
         }
 
+    }
+
+    public FixityMRTEntry getEntry() {
+        return entry;
     }
 }
 
