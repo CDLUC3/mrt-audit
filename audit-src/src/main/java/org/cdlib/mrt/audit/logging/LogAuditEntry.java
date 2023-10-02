@@ -30,6 +30,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.audit.logging;
 
 import java.util.Properties;
+import org.apache.logging.log4j.Level;
 import org.cdlib.mrt.audit.handler.FixityHandlerStandard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,6 +54,8 @@ public class LogAuditEntry
     protected static final String MESSAGE = NAME + ": ";
     private static final Logger log4j = LogManager.getLogger();
     
+    
+    protected static final Level addLevel = Level.DEBUG;
     protected String serviceProcess = null;
     protected Long durationMs = null;
     protected FixityMRTEntry fixityEntry = null;
@@ -62,12 +65,25 @@ public class LogAuditEntry
     protected String keyPrefix = null;
     
     
-    public static LogAuditEntry getLogInvPrimary(
+    public static LogAuditEntry getLogAuditEntry(
             long durationMs,
             FixityMRTEntry fixityEntry)
         throws TException
     {
         return new LogAuditEntry(durationMs,fixityEntry);
+    }
+    
+    public static void addLogAuditEntry(
+            long durationMs,
+            FixityMRTEntry fixityEntry)
+        throws TException
+    {
+        if (log4j.getLevel() != addLevel) {
+            log4j.trace("***skip addLogAuditEntry");
+            return;
+        }
+        LogAuditEntry logEntry = getLogAuditEntry(durationMs, fixityEntry);
+        logEntry.addEntry(addLevel);
     }
     
     public LogAuditEntry(
@@ -125,10 +141,10 @@ public class LogAuditEntry
     }
     
     
-    public void addEntry()
+    public void addEntry(Level addLevel)
         throws TException
     {
-        stateEntry.addLogStateEntry("debug", "auditJSON");
+        stateEntry.addLogStateEntry(addLevel.toString(), "auditJSON");
     }
 }
 

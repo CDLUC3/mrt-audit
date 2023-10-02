@@ -267,6 +267,8 @@ public class FixityUtil
                     , 
                     2, true);
             
+            LogAuditEntry.addLogAuditEntry(durationMs, entry);
+            
         } catch (TException.EXTERNAL_SERVICE_UNAVAILABLE tex) {
             addSystemException(entry, tex);
             
@@ -278,8 +280,6 @@ public class FixityUtil
             throw new TException.GENERAL_EXCEPTION(ex);
 
         } finally {
-            LogAuditEntry logEntry = LogAuditEntry.getLogInvPrimary(durationMs, entry);
-            logEntry.addEntry();
             
         }
     }

@@ -98,6 +98,8 @@ public class FixityHandlerStandard
             throw tex;
 
         } catch (Exception ex) {
+            System.out.println("runFixity Exception(" + entry.dump("runFixity Exception"));
+            ex.printStackTrace();
             throw new TException.GENERAL_EXCEPTION(ex);
         }
 
