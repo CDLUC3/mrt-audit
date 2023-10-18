@@ -54,13 +54,17 @@ import org.cdlib.mrt.audit.app.jersey.KeyNameHttpInf;
 import org.cdlib.mrt.audit.app.jersey.JerseyBase;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.db.InvAudit;
+import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.audit.service.FixityEntriesState;
 import org.cdlib.mrt.audit.service.FixityMRTServiceInf;
 import org.cdlib.mrt.log.utility.Log4j2Util;
+import org.cdlib.mrt.s3.service.NodeIO;
+import org.cdlib.mrt.s3.service.NodeIOState;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.StringUtil;
+import org.json.JSONObject;
 
 /**
  * Thin Jersey layer for fixity handling
@@ -286,6 +290,37 @@ public class JerseyFixity
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
+    
+    /**
+     * Provide a Storage state operation in Audit
+     * @param cs on close actions
+     * @param sc ServletConfig used to get system configuration
+     * @return formatted service information
+     * @throws TException
+     */
+    public String getJsonState(
+            CloseableService cs,
+            ServletConfig sc)
+        throws TException
+    {
+        try {
+            log("getServiceState entered:"
+                    );
+            FixityServiceInit fixityServiceInit = FixityServiceInit.getFixityServiceInit(sc);
+            FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
+
+            NodeIO nodeIO = FixityServiceConfig.getNodeIO();
+            JSONObject state = NodeIOState.runState(nodeIO);
+            return state.toString();
+
+        } catch (TException tex) {
+            throw tex;
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
 
     /**
      * Get state information about a specific node
@@ -323,6 +358,29 @@ public class JerseyFixity
         }
     }
 
+    @GET
+    @Path("/jsonstate")
+    public Response callGetJsonState(
+            @Context CloseableService cs,
+            @Context ServletConfig sc)
+        throws TException
+    {
+        LoggerInf logger = null;
+        try {
+            String jsonStateS = getJsonState(cs,sc);
+              return Response 
+                .status(200).entity(jsonStateS)
+                    .build();      
+        } catch (TException tex) {
+            return getExceptionResponse(tex, "xml", logger);
+
+        } catch (Exception ex) {
+            System.out.println("TRACE:" + StringUtil.stackTrace(ex));
+            throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
+        }
+    }
+    
+    
     /**
      * Start fixity service
      * @param formatType user provided format type
