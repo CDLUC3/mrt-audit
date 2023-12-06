@@ -331,18 +331,20 @@ public class JerseyFixity
      * @throws TException
      */
     public String getJsonStatus(
+            int timeoutSec,
             CloseableService cs,
             ServletConfig sc)
         throws TException
     {
         try {
             log4j.debug("getJsonStatus entered:"
-                    );
+                    + " - timeoutSec:" + timeoutSec
+            );
             FixityServiceInit fixityServiceInit = FixityServiceInit.getFixityServiceInit(sc);
             FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
 
             NodeIO nodeIO = FixityServiceConfig.getNodeIO();
-            JSONObject status = NodeIOStatus.runStatus(nodeIO);
+            JSONObject status = NodeIOStatus.runStatus(nodeIO, timeoutSec);
             return status.toString();
 
         } catch (TException tex) {
@@ -412,18 +414,25 @@ public class JerseyFixity
             throw new TException.GENERAL_EXCEPTION(MESSAGE + "Exception:" + ex);
         }
     }
-
+    
     @GET
     @Path("/jsonstatus")
-    public Response callGetJsonStatus(
+    public Response getJsonStatus(
+            @DefaultValue("5") @QueryParam("timeout") String timeoutSecS,
             @Context CloseableService cs,
             @Context ServletConfig sc)
         throws TException
     {
         LoggerInf logger = null;
+        int timeoutSec = 5;
         try {
-            String jsonStateS = getJsonStatus(cs,sc);
-              return Response 
+            try {
+                timeoutSec = Integer.parseInt(timeoutSecS);;
+            } catch (Exception ex) { 
+                log4j.debug("Invalid value sent jsonstatus - process continues - timeoutSecS:" + timeoutSecS);
+            }
+            String jsonStateS = getJsonStatus(timeoutSec, cs,sc);
+            return Response 
                 .status(200).entity(jsonStateS)
                     .build();      
         } catch (TException tex) {
