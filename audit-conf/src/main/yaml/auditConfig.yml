@@ -25,13 +25,13 @@ audit-info:
     qualifier: yyMMdd
     
   mail:
-    smtp: "{!SSM: audit/config/mail/smtp !DEFAULT: localhost}"
-    from: "{!SSM: audit/config/mail/from !DEFAULT: uc3staff@ucop.edu}"
+    smtp: "DummyMailSMTP"
+    from: "DummyMailFrom"
     
   cleanup:
-    subject: "{!SSM: audit/config/cleanup/subject !DEFAULT: NONE}"
-    to: "{!SSM: audit/config/cleanup/to !DEFAULT: NONE}"
-    msg: "{!SSM: audit/config/cleanup/msg !DEFAULT: NONE}"
+    subject: "DummyCleanupSubject"
+    to: "DummyCleanupTo"
+    msg: "DummyCleanupMessage"
     
   db:
     user: "{!SSM: inv/readwrite/db-user}"
