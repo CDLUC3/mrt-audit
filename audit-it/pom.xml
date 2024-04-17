@@ -228,13 +228,6 @@
             <version>1.0-SNAPSHOT</version>
             <scope>runtime</scope>
           </dependency>
-          
-          <dependency>
-            <groupId>org.cdlib.mrt</groupId>
-            <artifactId>mrt-json</artifactId>
-            <version>2.0-SNAPSHOT</version>
-            <scope>runtime</scope>
-          </dependency>
 
           <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -244,6 +237,11 @@
           <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
+          </dependency>
+         
+          <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
           </dependency>
 
           <dependency>
