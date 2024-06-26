@@ -19,12 +19,12 @@ phases:
       - mvn -ntp clean install
       - |
         if [[ "$CODEBUILD_WEBHOOK_TRIGGER" == "main" ]]; then
-          DEPVER=''
+          SEMVER=''
         else
-          DEPVER='-Dversion=${CODEBUILD_WEBHOOK_TRIGGER}'
+          SEMVER='-Dversion=${CODEBUILD_WEBHOOK_TRIGGER}'
         fi
-      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-it/target/mrt-audit-it-1.0-SNAPSHOT.war ${DEPVER}
-      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war ${DEPVER}
+      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-it/target/mrt-audit-it-*.war ${SEMVER}
+      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-war/target/mrt-auditwarpub-*.war ${SEMVER}
   post_build:
     commands:
       #- aws s3 rm s3://${S3CFBUCKET}/api --recursive
