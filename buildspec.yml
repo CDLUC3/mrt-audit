@@ -1,0 +1,24 @@
+version: 0.2
+
+# Pre-requisites
+# - Create CodeBuild project
+#   - Provide minimal github credentials to access public repo
+
+phases:
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - cp settings.xml ~/.m2/
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region us-west-2 --query authorizationToken --output text`
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+  build:
+    on-failure: ABORT
+    commands:
+      # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
+      - mvn -ntp clean install
+      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-it/target/mrt-audit-it-1.0-SNAPSHOT.war
+      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war
+  post_build:
+    commands:
+      #- aws s3 rm s3://${S3CFBUCKET}/api --recursive
