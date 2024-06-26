@@ -17,8 +17,8 @@ phases:
     commands:
       # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
       - mvn -ntp clean install
-      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-it/target/mrt-audit-it-1.0-SNAPSHOT.war
-      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war
+      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-it/target/mrt-audit-it-1.0-SNAPSHOT.war -Dversion=2.0.0
+      - mvn deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war -Dversion=2.0.0
   post_build:
     commands:
       #- aws s3 rm s3://${S3CFBUCKET}/api --recursive
