@@ -17,6 +17,13 @@ phases:
   build:
     on-failure: ABORT
     commands:
+      - |
+        docker build --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
+          --build-arg CODEARTIFACT_AUTH_TOKEN=${CODEARTIFACT_AUTH_TOKEN} \
+          --build-arg CODEARTIFACT_URL=${CODEARTIFACT_URL} \
+          -t ${ECR_REGISTRY}/mrt-audit:dev .
+      - foofail
+
       # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
       - mvn -ntp clean install
       - |
