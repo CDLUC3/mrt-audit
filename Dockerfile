@@ -10,7 +10,7 @@ ARG CODEARTIFACT_URL=tbd
 FROM ${ECR_REGISTRY}/merritt-maven:dev as build
 
 COPY settings.xml ~/.m2/
-RUN mvn dependency:get -Dmaven.legacyLocalRepo=true -DgroupId=org.cdlib.mrt \
+RUN mvn dependency:get -DgroupId=org.cdlib.mrt \
   -DartifactId=mrt-auditwarpub -Dversion=codebuild -Dpackaging=war \
   -DrepoUrl=${CODEARTIFACT_URL} > /tmp/tb.log
 RUN pwd >> /tmp/tb.log
