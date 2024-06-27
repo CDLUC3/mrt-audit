@@ -11,7 +11,8 @@ phases:
       - cp settings.xml ~/.m2/
       - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region us-west-2 --query authorizationToken --output text`
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-      - env
+      - BRANCHTAG=`git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD`
+      - echo $BRANCHTAG
 
   build:
     on-failure: ABORT
@@ -19,10 +20,10 @@ phases:
       # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
       - mvn -ntp clean install
       - |
-        if [[ "$CODEBUILD_WEBHOOK_TRIGGER" == "main" ]]; then
+        if [[ "${BRANCHTAG}" == "main" ]]; then
           SEMVER=''
         else
-          SEMVER='-Dversion=${CODEBUILD_WEBHOOK_TRIGGER}'
+          SEMVER='-Dversion=${BRANCHTAG}'
         fi
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) ${SEMVER}
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) ${SEMVER}
