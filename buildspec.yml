@@ -11,7 +11,6 @@ phases:
       - cp settings.xml ~/.m2/
       - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region us-west-2 --query authorizationToken --output text`
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-      - BRANCHTAG=`git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD || echo 'na'`
       - BRANCHTAG=`git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || git rev-parse --short HEAD`
       - echo "Branchtag ${BRANCHTAG}"
 
@@ -21,9 +20,11 @@ phases:
       # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
       - mvn -ntp clean install
       - |
-        if [[ "${BRANCHTAG}" == "main" ]]; then
+        if [[ "${BRANCHTAG}" == "main" ]]
+        then
           SEMVER=''
-        elsif [[ "${BRANCHTAG}" == "codebuild" ]]; then
+        elsif [[ "${BRANCHTAG}" == "codebuild" ]]
+        then
           SEMVER=''
         else
           SEMVER="-Dversion=${BRANCHTAG}"
