@@ -23,7 +23,7 @@ phases:
         if [[ "${BRANCHTAG}" == "main" ]]; then
           SEMVER=''
         else
-          SEMVER='-Dversion=${BRANCHTAG}'
+          SEMVER="-Dversion=${BRANCHTAG}"
         fi
       - echo "Semver $SEMVER"
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) ${SEMVER}
