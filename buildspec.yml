@@ -23,6 +23,8 @@ phases:
       - |
         if [[ "${BRANCHTAG}" == "main" ]]; then
           SEMVER=''
+        elsif [[ "${BRANCHTAG}" == "codebuild" ]]; then
+          SEMVER=''
         else
           SEMVER="-Dversion=${BRANCHTAG}"
         fi
