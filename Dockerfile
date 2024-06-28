@@ -4,12 +4,13 @@
 #*********************************************************************
 
 ARG ECR_REGISTRY=ecr_registry_not_set
+
+FROM ${ECR_REGISTRY}/merritt-maven:dev as build
+
 ARG CODEARTIFACT_AUTH_TOKEN
 ARG CODEARTIFACT_URL
 ARG AWS_REGION
 ARG AWS_ACCOUNT_ID
-
-FROM ${ECR_REGISTRY}/merritt-maven:dev as build
 
 ENV ECR_REGISTRY=$ECR_REGISTRY
 ENV CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN
