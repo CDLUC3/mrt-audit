@@ -17,8 +17,10 @@ phases:
   build:
     on-failure: ABORT
     commands:
+      - echo ${CODEARTIFACT_URL}
       - |
-        docker build --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
+        docker build \
+          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
           --build-arg CODEARTIFACT_AUTH_TOKEN=${CODEARTIFACT_AUTH_TOKEN} \
           --build-arg CODEARTIFACT_URL=${CODEARTIFACT_URL} \
           --build-arg AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} \
