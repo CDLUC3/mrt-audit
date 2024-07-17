@@ -5,30 +5,9 @@
 
 ARG ECR_REGISTRY=ecr_registry_not_set
 
-FROM ${ECR_REGISTRY}/merritt-maven:dev as build
-
-ARG CODEARTIFACT_AUTH_TOKEN
-ARG CODEARTIFACT_URL
-ARG AWS_REGION
-ARG AWS_ACCOUNT_ID
-
-ENV ECR_REGISTRY=$ECR_REGISTRY
-ENV CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN
-ENV CODEARTIFACT_URL=$CODEARTIFACT_URL
-ENV AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
-ENV AWS_REGION=$AWS_REGION
-
-COPY settings.xml ~/.m2/
-RUN mvn dependency:get -DgroupId=org.cdlib.mrt \
-  -DartifactId=mrt-auditwarpub -Dversion=codebuild \
-  -DrepoUrl=${CODEARTIFACT_URL} 
-RUN pwd >> /tmp/tb.log
-RUN ls >> /tmp/tb.log
-
 FROM ${ECR_REGISTRY}/merritt-tomcat:dev
 
-COPY --from=build /tmp/tb.log /tmp/tb.log
-RUN cat /tmp/tb.log
+COPY audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war /usr/local/tomcat/webapps
 
 RUN mkdir -p /tdr/tmpdir/logs 
 

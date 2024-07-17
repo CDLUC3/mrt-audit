@@ -17,17 +17,6 @@ phases:
   build:
     on-failure: ABORT
     commands:
-      - echo ${CODEARTIFACT_URL}
-      - |
-        docker build \
-          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
-          --build-arg CODEARTIFACT_AUTH_TOKEN=${CODEARTIFACT_AUTH_TOKEN} \
-          --build-arg CODEARTIFACT_URL=${CODEARTIFACT_URL} \
-          --build-arg AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} \
-          --build-arg AWS_REGION=${AWS_REGION} \
-          -t ${ECR_REGISTRY}/mrt-audit:dev .
-      - foofail
-
       # - mvn -ntp clean install -Ddocker.skip -DskipITs -Dmaven.test.skip=true
       - mvn -ntp clean install
       - |
@@ -43,6 +32,11 @@ phases:
       - echo "Semver $SEMVER"
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) -Dversion=${SEMVER}
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) -Dversion=${SEMVER}
+
+      - |
+        docker build \
+          --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
+          -t ${ECR_REGISTRY}/mrt-audit:dev .
   post_build:
     commands:
       #- aws s3 rm s3://${S3CFBUCKET}/api --recursive
