@@ -31,7 +31,7 @@ phases:
         else
           SEMVER="-Dversion=${BRANCHTAG}"
         fi
-      - echo "Semver: [$SEMVER]"
+      - echo "Semver [${SEMVER}]"
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) ${SEMVER}
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) ${SEMVER}
 
@@ -39,6 +39,3 @@ phases:
         docker build --push \
           --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
           -t ${ECR_REGISTRY}/mrt-audit:dev .
-  post_build:
-    commands:
-      #- aws s3 rm s3://${S3CFBUCKET}/api --recursive
