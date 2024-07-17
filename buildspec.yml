@@ -9,7 +9,7 @@ phases:
     on-failure: ABORT
     commands:
       - cp settings.xml ~/.m2/
-      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region us-west-2 --query authorizationToken --output text`
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region $AWS_REGION  --query authorizationToken --output text`
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
       - BRANCHTAG=`git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || git rev-parse --short HEAD`
       - echo "Branchtag ${BRANCHTAG}"
@@ -41,8 +41,8 @@ phases:
           SEMVER="-Dversion=${BRANCHTAG}"
         fi
       - echo "Semver $SEMVER"
-      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) ${SEMVER}
-      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) ${SEMVER}
+      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) -Dversion=${SEMVER}
+      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) -Dversion=${SEMVER}
   post_build:
     commands:
       #- aws s3 rm s3://${S3CFBUCKET}/api --recursive
