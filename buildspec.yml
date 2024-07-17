@@ -22,10 +22,10 @@ phases:
       - |
         if [[ "${BRANCHTAG}" == "main" ]]
         then
-          SEMVER=''
+          SEMVER=`date +%Y%m%d_%H%M`
         elif [[ "${BRANCHTAG}" == "codebuild" ]]
         then
-          SEMVER=''
+          SEMVER=`date +%Y%m%d_%H%M`
         else
           SEMVER="-Dversion=${BRANCHTAG}"
         fi
