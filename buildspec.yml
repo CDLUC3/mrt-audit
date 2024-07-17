@@ -34,7 +34,7 @@ phases:
       - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) -Dversion=${SEMVER}
 
       - |
-        docker build \
+        docker build --push \
           --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
           -t ${ECR_REGISTRY}/mrt-audit:dev .
   post_build:
