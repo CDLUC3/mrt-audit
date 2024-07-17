@@ -24,16 +24,16 @@ phases:
       - |
         if [[ "${BRANCHTAG}" == "main" ]]
         then
-          SEMVER=`date +%Y%m%d_%H%M`
+          SEMVER=''
         elif [[ "${BRANCHTAG}" == "codebuild" ]]
         then
-          SEMVER=`date +%Y%m%d_%H%M`
+          SEMVER=''
         else
           SEMVER="-Dversion=${BRANCHTAG}"
         fi
-      - echo "Semver $SEMVER"
-      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) -Dversion=${SEMVER}
-      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) -Dversion=${SEMVER}
+      - echo "Semver: [$SEMVER]"
+      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-it/target/mrt-audit-it-*.war) ${SEMVER}
+      - mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) ${SEMVER}
 
       - |
         docker build --push \
