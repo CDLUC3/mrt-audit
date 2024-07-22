@@ -7,7 +7,7 @@ ARG ECR_REGISTRY=ecr_registry_not_set
 
 FROM ${ECR_REGISTRY}/merritt-tomcat:dev
 
-COPY audit-war/target/mrt-auditwarpub-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/audit.war
+COPY audit-war/target/mrt-auditwarpub-*.war /usr/local/tomcat/webapps/audit.war
 
 RUN mkdir -p /build/static/ && \
     date -r ingest-src/target +'mrt-ingest: %Y-%m-%d:%H:%M:%S' > /build/static/build.content.txt && \
