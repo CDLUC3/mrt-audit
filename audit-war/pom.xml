@@ -9,6 +9,11 @@
   <name>UC3-mrtAuditWarPub</name>
   <url>http://uc3.cdlib.org</url>
 
+  <properties>
+    <merritt-bom.version>3.0-SNAPSHOT</merritt-bom.version>
+    <propertyDir>test</propertyDir>
+  </properties>
+
   <distributionManagement>
     <repository>
       <id>cdlib-uc3-mrt-uc3-mrt-java</id>
@@ -22,7 +27,7 @@
       <dependency>
         <groupId>org.cdlib.mrt</groupId>
         <artifactId>mrt-reflectoring-bom</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>${merritt-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -32,13 +37,10 @@
   <parent>
     <groupId>org.cdlib.mrt</groupId>
     <artifactId>mrt-parent-properties</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <!--This version cannot be set as a property-->
+    <version>PAR-3.0-SNAPSHOT</version>
   </parent>
 
-  <!-- force UTF-8 -->
-  <properties>
-    <propertyDir>test</propertyDir>
-  </properties>
 
   <profiles>
     <profile>
@@ -70,7 +72,7 @@
                 <artifactItem>
                   <groupId>org.cdlib.mrt</groupId>
                   <artifactId>mrt-auditwarpub</artifactId>
-                  <version>3.0-SNAPSHOT</version>
+                  <version>${project.version}</version>
                   <type>war</type>
                   <overWrite>true</overWrite>
                   <outputDirectory>./${warLocation}</outputDirectory>
@@ -90,7 +92,7 @@
       <groupId>org.cdlib.mrt</groupId>
       <artifactId>mrt-auditsrcpub</artifactId>
       <scope>runtime</scope>
-      <version>3.0-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
   </dependencies>
