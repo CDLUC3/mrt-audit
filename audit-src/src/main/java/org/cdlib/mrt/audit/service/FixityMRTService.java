@@ -179,13 +179,24 @@ public class FixityMRTService
         if (fixityServiceConfig.isShutdown()) {
             throw new TException.EXTERNAL_SERVICE_UNAVAILABLE("Fixity service shutdown");
         }
-        Connection connection = fixityServiceConfig.getConnection(false);
-        ProcessFixityEntry update = ProcessFixityEntry.getProcessFixityEntry("update", audit, connection, logger);
-        FixityMRTEntry responseEntry = update.call();
-        if (update.getException() != null) {
-            throwException(update.getException());
+        Connection connection = null;
+        try {
+            connection = fixityServiceConfig.getConnection(false);
+            ProcessFixityEntry update = ProcessFixityEntry.getProcessFixityEntry("update", audit, connection, logger);
+            FixityMRTEntry responseEntry = update.call();
+            if (update.getException() != null) {
+                throwException(update.getException());
+            }
+            return responseEntry;
+        
+        } catch (TException tex) {
+            throw tex;
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
-        return responseEntry;
     }
 
     @Override
@@ -197,17 +208,28 @@ public class FixityMRTService
         if (localLog == null) {
             throw new TException.GENERAL_EXCEPTION("update: null log");
         }
-        Connection connection = fixityServiceConfig.getConnection(false);
-        InvAudit audit = FixityDBUtil.getAudit(connection, id, localLog);
-        if (audit == null) {
-            throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "update item not found:" + id);
+        Connection connection = null;
+        try{ 
+            connection = fixityServiceConfig.getConnection(false);
+            InvAudit audit = FixityDBUtil.getAudit(connection, id, localLog);
+            if (audit == null) {
+                throw new TException.REQUESTED_ITEM_NOT_FOUND(MESSAGE + "update item not found:" + id);
+            }
+            ProcessFixityEntry update = ProcessFixityEntry.getProcessFixityEntry("update", audit, connection, localLog);
+            FixityMRTEntry responseEntry = update.call();
+            if (update.getException() != null) {
+                throwException(update.getException());
+            }
+            return responseEntry;
+        
+        } catch (TException tex) {
+            throw tex;
+            
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception ex) { }
         }
-        ProcessFixityEntry update = ProcessFixityEntry.getProcessFixityEntry("update", audit, connection, localLog);
-        FixityMRTEntry responseEntry = update.call();
-        if (update.getException() != null) {
-            throwException(update.getException());
-        }
-        return responseEntry;
     }
 
     @Override
