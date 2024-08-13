@@ -219,6 +219,7 @@ public class ProcessFixityEntry
             FixityValidationEntry validator = FixityActionAbs.getFixityValidationEntry(audit, connection, logger);
             validator.run();
             connection.commit();
+            mrtEntry = FixityDBUtil.getMRTEntry(audit, connection, logger);
             
 
         } catch (Exception ex) {
