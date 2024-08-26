@@ -74,7 +74,7 @@ phases:
         | sed -e "s/^/- /" >> $RPT
 
     - |
-      for pkg in mrtaudit
+      for pkg in mrt-auditwarpub
       do
         echo "## Code Artifact Packages for $pkg" >> $RPT
         aws codeartifact list-package-versions \
