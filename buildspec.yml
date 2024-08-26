@@ -42,8 +42,10 @@ phases:
       mvn -ntp deploy:deploy-file \
         -Durl=${CODEARTIFACT_URL} \
         -DrepositoryId=cdlib-uc3-mrt-uc3-mrt-java \
+        -DgroupId=org.cdlib.mrt -DartifactId=mrt-audit \
         -Dfile=$(ls audit-war/target/mrt-auditwarpub-*.war) ${SEMVER}
 
+      mvn -ntp deploy:deploy-file -Durl=${CODEARTIFACT_URL} -
     - |
         docker build --push --quiet \
         --build-arg ECR_REGISTRY=${ECR_REGISTRY} \
@@ -73,7 +75,7 @@ phases:
         | sed -e "s/^/- /" >> $RPT
 
     - |
-      for pkg in mrt-auditwarpub
+      for pkg in mrtaudit
       do
         echo "## Code Artifact Packages for $pkg" >> $RPT
         aws codeartifact list-package-versions \
