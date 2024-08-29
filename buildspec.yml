@@ -41,7 +41,7 @@ phases:
     - mkdir -p /build/static
     - |
       echo "build_tag: ${BRANCHTAG}" > /build/static/build.content.txt 
-    - jar uf $(ls audit-war/target/mrt-auditwarpub-*.war) -C /build static/build.content.txt
+    - ${JAVA_HOME}/bin/jar uf $(ls audit-war/target/mrt-auditwarpub-*.war) -C /build static/build.content.txt
 
 
     - |
