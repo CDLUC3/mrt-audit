@@ -6,13 +6,8 @@
 ARG ECR_REGISTRY=ecr_registry_not_set
 
 FROM ${ECR_REGISTRY}/merritt-tomcat:dev
-ARG COMMITDATE=''
 
 COPY audit-war/target/mrt-auditwarpub-*.war /usr/local/tomcat/webapps/audit.war
-
-RUN mkdir -p /build/static && \
-    echo "mrt-audit: ${COMMITDATE}" > /build/static/build.content.txt && \
-    jar uf /usr/local/tomcat/webapps/audit.war -C /build static/build.content.txt
 
 RUN mkdir -p /tdr/tmpdir/logs 
 
