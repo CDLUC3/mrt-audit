@@ -411,6 +411,10 @@ public class RunFixity implements Runnable
             ThreadContext.put("processMs", Long.toString(stopMs - startMs));
             ThreadContext.put("runVerifiedMs", Long.toString(stopMs - startCompleteMs));
             ThreadContext.put("bytes", Long.toString(bytes));
+            Integer awsVersion = FixityServiceConfig.getAwsVersion();
+            if (awsVersion != null) {
+                ThreadContext.put("awsVersion", "" + FixityServiceConfig.getAwsVersion());
+            }
             LogManager.getLogger().info("Fixity Batch Compelete");
             
             log("************Termination of threads");
