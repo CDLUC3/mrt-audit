@@ -3,7 +3,7 @@ which-audit-info: "{!ENV: MERRITT_AUDIT_INFO !DEFAULT: audit-info}"
 audit-info:
   service:
     threadPool: "{!SSM: audit/config/threadPool !DEFAULT: 5}"
-    nodePath: "{!SSM: audit/config/nodePath  !DEFAULT: yaml:}"
+    nodePath: "{!SSM: audit/config/nodePath  !DEFAULT: yaml:2}"
     auditQualify: "{!SSM: audit/config/auditQualify !DEFAULT: NONE}"
     intervalDays: "{!SSM: audit/config/intervalDays !DEFAULT: 0}"
     queueSleepMs: "{!SSM: audit/config/queueSleepMs !DEFAULT: 0}"

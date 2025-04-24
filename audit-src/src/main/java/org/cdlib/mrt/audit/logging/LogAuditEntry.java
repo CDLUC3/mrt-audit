@@ -134,6 +134,7 @@ public class LogAuditEntry
         }
         stateEntry.setBytes(fixityEntry.getSize());
         stateEntry.setFiles(1L);
+        stateEntry.setAwsVersion(FixityServiceConfig.getAwsVersion());
         Properties stateProp = new Properties();
         if (durationMs != null) {
             stateProp.setProperty("nearline", "true");
