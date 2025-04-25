@@ -43,7 +43,7 @@ audit-info:
 audit-info-docker: &docker    
   service:
     threadPool: "1"
-    nodePath: "yaml:"
+    nodePath: "yaml:2"
     auditQualify: "NONE"
     intervalDays: "0"
     queueSleepMs: "5000"
