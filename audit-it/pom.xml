@@ -164,7 +164,7 @@
                             <port>it-server.port:8080</port>
                           </ports>
                           <wait>
-                            <time>4000</time>
+                            <time>14000</time>
                           </wait>
                           <volumes>
                             <bind>
