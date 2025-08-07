@@ -18,7 +18,7 @@ services:
     container_name: it-server
     image: ${ECR_REGISTRY}/merritt-tomcat:dev
     volumes:
-    - "${MDIR}/audit-it/target/mrt-audit-it-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtaudit.war"
+    - "${MDIR}/audit-it/target/mrt-audit-it-3.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtaudit.war"
     ports:
     - published: 8080
       target: 8080
