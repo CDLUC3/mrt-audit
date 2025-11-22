@@ -52,6 +52,7 @@ public class FixityValidationWrapper
     protected FixityItemDB db = null;
     protected LoggerInf logger = null;
     protected FixityValidation validator = null;
+    protected long timeMs = 0;
 
     public FixityValidationWrapper(
             InvAudit audit,
@@ -77,13 +78,14 @@ public class FixityValidationWrapper
             Thread t = Thread.currentThread();
             String name = t.getName();
             log("START:" + audit.getId());
+            long startMs = System.currentTimeMillis();
             validator.run();
             if (DEBUG) {
                 if (validator.getException() != null) {
                     log("Exception:" + validator.getException().toString());
                 }
             }
-
+            timeMs = System.currentTimeMillis() - startMs;
 
 
         } catch(Exception e)  {
@@ -119,5 +121,11 @@ public class FixityValidationWrapper
         if (validator == null) return null;
         return validator.isUpdated();
     }
+
+    public long getTimeMs() {
+        return timeMs;
+    }
+    
+    
 }
 

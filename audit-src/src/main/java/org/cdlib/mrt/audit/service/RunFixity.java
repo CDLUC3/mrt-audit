@@ -35,6 +35,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.cdlib.mrt.audit.action.FixityValidationWrapper;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.HashMap;
 
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -45,18 +46,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadPoolExecutor;
+import org.cdlib.mrt.log.utility.AddStateEntryGen;
 
 
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixNames;
 import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
+import org.cdlib.mrt.audit.logging.NodeStat;
 import org.cdlib.mrt.audit.utility.FixityOwn;
 import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import org.cdlib.mrt.core.DateState;
+import org.cdlib.mrt.s3.service.NodeIO;
 import org.cdlib.mrt.utility.DateUtil;
 import org.cdlib.mrt.utility.TFileLogger;
 import org.cdlib.mrt.utility.TFrame;
+import org.json.JSONObject;
 
 /**
  * This class performs the overall fixity functions.
@@ -98,6 +104,7 @@ public class RunFixity implements Runnable
     protected int capacity = 100;
     protected LinkedList<InvAudit> queue = null;
     FixityState fixityState = null;
+    protected HashMap<Long,Long> idNodeMap = new HashMap<>();
     
 
     /**
@@ -339,18 +346,24 @@ public class RunFixity implements Runnable
         
         Connection auditConnection = null;
         
-        ArrayList<FixityValidationWrapper> fixityWrapperList = new ArrayList<FixityValidationWrapper>();
+        ArrayList<FixityValidationWrapper> fixityWrapperList = new ArrayList<>();
+        long getMySqlMs = 0L;
+        long threadLatencyMs = 0L;
+        Long startLatencyMs = null;
         try {
             auditConnection = db.getConnection(true);
+            long startMySql = System.currentTimeMillis();
             if (addSQLEntries() == 0) {
                 log("No ITEM content - sleep 30 seconds");
                 Thread.sleep(30000);
                 return;
             }
+            getMySqlMs = System.currentTimeMillis() - startMySql;
             log("Thread pool count:" + fixityState.getThreadPool());
             if (!fixityState.isRunFixity()) return;
+            int threadPoolCnt = fixityState.getThreadPool();
             ExecutorService threadPool 
-                    = Executors.newFixedThreadPool(fixityState.getThreadPool());
+                    = Executors.newFixedThreadPool(threadPoolCnt);
             
             long startMs = System.currentTimeMillis();
             long bytes = 0;
@@ -367,15 +380,33 @@ public class RunFixity implements Runnable
                 fixityWrapperList.add(wrapper);
                 fixityState.bumpCnt();
             }
+            if (threadPool instanceof ThreadPoolExecutor) {
+                ThreadPoolExecutor tpe = (ThreadPoolExecutor) threadPool;
+                int remainThreads = threadPoolCnt - tpe.getActiveCount();
+                if (remainThreads > 0) {
+                    startLatencyMs = System.currentTimeMillis();
+                }
+            }
             threadPool.shutdown();
             threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            
+            if (startLatencyMs != null)
+                threadLatencyMs = System.currentTimeMillis() - startLatencyMs;
             LinkedList<Long> verifiedList = new LinkedList<Long>();
+            NodeStat nodeStat = new NodeStat();
             for (FixityValidationWrapper wrapper : fixityWrapperList) {
-                try {
-                    bytes += wrapper.getValidator().getEntry().getSize();
-                } catch (Exception bex) { }
                 long id = wrapper.getAudit().getId();
+                long nodeID = wrapper.getAudit().getNodeid();
+                try {
+                    FixityMRTEntry mrtEntry = wrapper.getValidator().getEntry();
+                    bytes += wrapper.getValidator().getEntry().getSize();
+                    long entryBytes = mrtEntry.getSize();
+                    long nodeNumber = getNodeNumber(nodeID);
+                    long nodeTime = wrapper.getTimeMs();
+                    nodeStat.add(nodeNumber, entryBytes, nodeTime);
+                } catch (Exception bex) { 
+                    System.out.println("BEX:" + bex);
+                    bex.printStackTrace();
+                }
                 if (!wrapper.isUpdated()) {
                     verifiedList.add(id);
                 } else {
@@ -386,11 +417,14 @@ public class RunFixity implements Runnable
             long startCompleteMs = System.currentTimeMillis();
             FixityOwn.completeOwnList(auditConnection, verifiedList, logger);
             long stopMs = System.currentTimeMillis();
+            long putMySqlMs = stopMs - startCompleteMs;
             if (STOP) stop();
             // long sleepTime = 700 - (delta * 50);
             long sleepTime = fixityState.getQueueSleepMs();
             if (sleepTime > 0) {
+                try {
                 Thread.sleep(sleepTime);
+                } catch (Exception x) { }
             }
             
             String msg = MESSAGE
@@ -401,21 +435,43 @@ public class RunFixity implements Runnable
                     + " - processMs=" + (stopMs - startMs)
                     + " - runVerifiedMs=" + (stopMs - startCompleteMs
                     + " - bytes=" + bytes
+                    + " - getMySqlMs=" + getMySqlMs
+                    + " - putMySqlMs=" + putMySqlMs
+                    + " - threadLatencyMs=" + threadLatencyMs
                     );
-            //System.out.println(msg);
             logger.logMessage(msg, 1, true);
-            ThreadContext.put("capacity", Integer.toString(capacity));
-            ThreadContext.put("sleepTime", Long.toString(sleepTime));
-            ThreadContext.put("verified", Integer.toString(verifiedList.size()));
-            ThreadContext.put("non-verified", Integer.toString(capacity - verifiedList.size()));
-            ThreadContext.put("processMs", Long.toString(stopMs - startMs));
-            ThreadContext.put("runVerifiedMs", Long.toString(stopMs - startCompleteMs));
-            ThreadContext.put("bytes", Long.toString(bytes));
+            
+            JSONObject batchJson = new JSONObject();
+            JSONObject properties = new JSONObject();
+            properties.put("capacity", capacity);
+            properties.put("sleepTime", sleepTime);
             Integer awsVersion = FixityServiceConfig.getAwsVersion();
             if (awsVersion != null) {
-                ThreadContext.put("awsVersion", "" + FixityServiceConfig.getAwsVersion());
+                properties.put("awsVersion", "" + FixityServiceConfig.getAwsVersion());
             }
-            LogManager.getLogger().info("Fixity Batch Compelete");
+            if (auditQualify.length() > 0) {
+                properties.put("auditQualify", auditQualify);
+            }
+            JSONObject runJson = new JSONObject();
+            runJson.put("verified", verifiedList.size());
+            runJson.put("non-verified", (capacity - verifiedList.size()));
+            runJson.put("processMs", (stopMs - startMs));
+            runJson.put("runVerifiedMs",(stopMs - startCompleteMs));
+            runJson.put("bytes", bytes);
+            runJson.put("getMySqlMs", getMySqlMs);
+            runJson.put("putMySqlMs", putMySqlMs);
+            runJson.put("threadLatencyMs", threadLatencyMs);
+            batchJson.put("runInfo", runJson);
+            
+            batchJson.put("properties", properties);
+            JSONObject nodeJson = nodeStat.getJson();
+            batchJson.put("nodeInfo", nodeJson);
+            if (false) {
+                System.out.println("BATCH" +  batchJson.toString(2));
+            }
+            AddStateEntryGen.addLogStateEntry("info", "batchStat", batchJson);
+            //AddStateEntryGen.addEntry("info", batchJson);
+            //LogManager.getLogger().info("Fixity Batch Compelete");
             
             log("************Termination of threads");
 
@@ -519,6 +575,38 @@ public class RunFixity implements Runnable
 
         } catch (Exception ex) {
             throw new TException(ex);
+        }
+    }
+    
+    protected long getNodeNumber(long nodeID)
+        throws TException
+    {
+        Connection localConnect = null;
+        Long nodeNumber = idNodeMap.get(nodeID);
+        if (nodeNumber != null) {
+            return nodeNumber;
+        }
+        try {
+            localConnect = db.getConnection(true);
+            Long localNode = FixityDBUtil.getNodeNumber(nodeID, localConnect, logger);
+            if (localNode == null) {
+                throw new TException.INVALID_OR_MISSING_PARM("NodeID does not exist");
+            }
+            long nodeNumberL = localNode;
+            idNodeMap.put(nodeID, nodeNumberL);
+            
+            return nodeNumberL;
+            
+        } catch (TException tex) {
+            throw tex;
+            
+        } catch (Exception ex) {
+            throw new TException(ex);
+            
+        } finally {
+            try {
+                if (localConnect != null) localConnect.close();
+            } catch (Exception x) { }
         }
     }
 

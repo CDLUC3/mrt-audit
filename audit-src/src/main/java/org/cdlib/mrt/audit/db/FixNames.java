@@ -36,6 +36,7 @@ package org.cdlib.mrt.audit.db;
 public interface FixNames
 {
     public static final String AUDIT_TABLE = "inv_audits";
+    public static final String NODE_TABLE = "inv_nodes";
     public static final String FILE_TABLE = "inv_files";
 }
 
