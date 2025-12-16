@@ -40,6 +40,7 @@ import org.cdlib.mrt.audit.db.FixNames;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.core.FixityStatusType;
+import org.cdlib.mrt.db.DBUtil;
 import org.cdlib.mrt.utility.LoggerInf;
 import org.cdlib.mrt.utility.SQLUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -540,6 +541,32 @@ public class FixityDBUtil
             return null;
         }
      }
+    
+    public static Long getNodeNumber(
+            Long nodeSeq,
+            Connection connection,
+            LoggerInf logger)
+        throws TException
+    {
+        log("getCollection entered");
+        if (nodeSeq == null) return null;
+        String sql = "select number from " + FixNames.NODE_TABLE + " where id = \'" + nodeSeq + "\';";
+        log("sql:" + sql);
+        Properties[] propArray = cmd(connection, sql, logger);
+        
+        if ((propArray == null)) {
+            log("InvDBUtil - prop null");
+            return null;
+        } else if (propArray.length == 0) {
+            log("InvDBUtil - length == 0");
+            return null;
+        }
+        String nodeNumS = propArray[0].getProperty("number");
+        if (StringUtil.isAllBlank(nodeNumS)) return null;
+        Long nodeNum = Long.parseLong(nodeNumS);
+        log("nodeNum:" + nodeNum);
+        return nodeNum;
+    }
     
     public static FixityMRTEntry[] auditPropToFixityMRT(
             Properties[] auditProps,
