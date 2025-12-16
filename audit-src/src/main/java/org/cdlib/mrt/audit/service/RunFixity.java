@@ -402,7 +402,8 @@ public class RunFixity implements Runnable
                     long entryBytes = mrtEntry.getSize();
                     long nodeNumber = getNodeNumber(nodeID);
                     long nodeTime = wrapper.getTimeMs();
-                    nodeStat.add(nodeNumber, entryBytes, nodeTime);
+                    long streamTime = mrtEntry.getStreamMs();
+                    nodeStat.add(nodeNumber, entryBytes, nodeTime, streamTime);
                 } catch (Exception bex) { 
                     System.out.println("BEX:" + bex);
                     bex.printStackTrace();

@@ -68,6 +68,7 @@ public class FixityMRTEntry
     protected String lastDigestValue = null;
     protected long size = 0;
     protected long lastSize = 0;
+    protected long streamMs = 0;
     protected String note = null;
     protected DateState created = null;
     protected DateState verified = null;
@@ -520,8 +521,14 @@ public class FixityMRTEntry
     public void setAudit(InvAudit audit) {
         this.audit = audit;
     }
-    
-    
+
+    public long getStreamMs() {
+        return streamMs;
+    }
+
+    public void setStreamMs(long streamMs) {
+        this.streamMs = streamMs;
+    }
     
 }
 

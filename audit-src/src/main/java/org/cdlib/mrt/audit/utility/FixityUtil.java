@@ -248,6 +248,7 @@ public class FixityUtil
             long startTime = System.currentTimeMillis();
             cc.process();
             long procTime = System.currentTimeMillis() - startTime;
+            entry.setStreamMs(cc.getRunTime());
             durationMs = procTime;
             CloudChecksum.Digest test = cc.getDigest(checksumType);
             CloudChecksum.CloudChecksumResult fixityResult

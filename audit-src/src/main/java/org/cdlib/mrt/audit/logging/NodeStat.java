@@ -75,7 +75,8 @@ public class NodeStat
     public void add (
         long nodeNumber,
         long bytes,
-        long timeMs)
+        long timeMs,
+        long streamMs)
     {
         NodeInfo info = nodeMap.get(nodeNumber);
         if (info == null) {
@@ -85,6 +86,7 @@ public class NodeStat
         info.cnt++;
         info.bytes += bytes;
         info.timeMs += timeMs;
+        info.streamMs += streamMs;
         nodeMap.put(nodeNumber, info);
     }
     
@@ -101,6 +103,7 @@ public class NodeStat
                 nodeJson.put("count", nodeInfo.cnt);
                 nodeJson.put("bytes", nodeInfo.bytes);
                 nodeJson.put("timeMs", nodeInfo.timeMs);
+                nodeJson.put("streamMs", nodeInfo.streamMs);
                 statJson.put(nodeS, nodeJson);
             }
             return statJson;
@@ -117,6 +120,7 @@ public class NodeStat
         public int cnt = 0;
         public long bytes = 0;
         public long timeMs = 0;
+        public long streamMs = 0;
         
     }
 }
