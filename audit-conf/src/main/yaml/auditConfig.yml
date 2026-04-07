@@ -40,15 +40,24 @@ audit-info:
     name: "{!SSM: inv/db-name}"
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
 
-audit-info-docker: &docker    
+audit-info-docker: &docker
+  # ecs-stg:
+  #   AUDIT_THREAD_POOL: 2
+  #   AUDIT_QUEUE_SLEEP_MS: 60000
+  #   AUDIT_QUEUE_CAPACITY: 248
+  #   AUDIT_SIZE_CHECKSUM_BUFFER: 16000000
+  # ecs-prd:
+  #   AUDIT_THREAD_POOL: 8
+  #   AUDIT_QUEUE_SLEEP_MS: 0
+  #   AUDIT_QUEUE_CAPACITY: 248
   service:
-    threadPool: "1"
+    threadPool: "{!ENV: AUDIT_THREAD_POOL !DEFAULT: 2}"
     nodePath: "yaml:2"
     auditQualify: "NONE"
     intervalDays: "0"
-    queueSleepMs: "5000"
-    queueCapacity: "10"
-    sizeChecksumBuffer: 32000000
+    queueSleepMs: "{!ENV: AUDIT_QUEUE_SLEEP_MS !DEFAULT: 5000}"
+    queueCapacity: "{!ENV: AUDIT_QUEUE_CAPACITY !DEFAULT: 10}"
+    sizeChecksumBuffer: "{!ENV: AUDIT_SIZE_CHECKSUM_BUFFER !DEFAULT: 32000000}"
     
   state:
     id: audit
