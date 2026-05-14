@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2027, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.service.FixitySelectState;
@@ -60,6 +62,7 @@ public class FixityCleanup
     protected static final String NAME = "FixityCleanup";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
 
     protected FixitySelectState fixitySelect = null;
     protected enum CleanupStatus {missing, exception, error, keyerror, tested, notset};
@@ -139,11 +142,11 @@ public class FixityCleanup
             fixitySelect.replaceFixityEntries(testList);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             Properties entryProp = mrtEntry.retrieveProperties();
             String msg = MESSAGE + "Exception for entry id=" + mrtEntry.getItemKey()
                     + " - " + PropertiesUtil.dumpProperties("entry", entryProp)
                     ;
+            log4j.error(msg, ex);
             logger.logError(msg, 2);
             setException(ex);
 
@@ -185,7 +188,7 @@ public class FixityCleanup
             throw tex;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
 
         } finally {

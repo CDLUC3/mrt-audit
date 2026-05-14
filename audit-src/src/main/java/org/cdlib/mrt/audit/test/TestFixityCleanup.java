@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@ import org.cdlib.mrt.audit.action.ProcessFixityEntry;
 import org.cdlib.mrt.audit.action.FixityEmailWrapper;
 import org.cdlib.mrt.audit.action.FixityActionAbs;
 import org.cdlib.mrt.audit.action.FixityCleanup;
+import org.cdlib.mrt.audit.action.FixityCleanupProcessing;
 import org.cdlib.mrt.audit.action.FixityReportEntries;
 import org.cdlib.mrt.audit.action.FixityReportItem;
 import org.cdlib.mrt.audit.action.FixityReportSQL;
@@ -91,6 +92,8 @@ public class TestFixityCleanup
         
         Connection connection = null;
         try {
+            int segCnt = 2;
+            int capacity = 100;
             String propertyList[] = {
                 //"resources/TestFixityCleanup.properties"};
                 "resources/TestFixityCleanupStage.properties"};
@@ -99,20 +102,11 @@ public class TestFixityCleanup
             fixityServiceProperties
                     = FixityServiceConfig.useYaml();
             LoggerInf logger = LoggerAbs.getTFileLogger("testFormatter", 1, 10);
-            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceProperties, logger);
-         
-            System.out.println("from:" + fix.getEmailFrom());
-            System.out.println("to:" + fix.getEmailTo());
-            System.out.println("subject:" + fix.getEmailSubject());
-            System.out.println("msg:" + fix.getEmailMsg());
-            if (false) return;
-            FixitySelectState state = fix.call();
-            List<Properties> list = state.retrieveRows();
-            for (Properties outProp : list) {
-                System.out.println(PropertiesUtil.dumpProperties("FixityCleanup", outProp));
-            }
-            String report = formatIt(logger, state);
-            System.out.println("report\n" + report);
+            db = fixityServiceProperties.getDb();
+            FixityCleanupProcessing fcp = FixityCleanupProcessing.getFixityCleanupProcessing(db, capacity, segCnt, logger);
+            int fcpCnt = fcp.process();
+            System.out.println("fcpCnt:" + fcpCnt);
+            
         } catch(Exception e) {
                 System.out.println(
                     "Main: Encountered exception:" + e);

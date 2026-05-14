@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.log.utility.AddStateEntryGen;
 
 
@@ -93,6 +94,7 @@ public class RunFixity implements Runnable
 
     private static final boolean DEBUG = false;
     private static final boolean STOP = false;
+    private static final Logger log4j = LogManager.getLogger();
     protected LoggerInf logger = null;
     protected FixityItemDB db = null;
     protected long maxout = 100000000;
@@ -256,12 +258,11 @@ public class RunFixity implements Runnable
 
             } catch (TException.SQL_EXCEPTION sqlex) {
                 long failTime = DateUtil.getEpochUTCDate() - start;
-                sqlex.printStackTrace();
                 setEx(sqlex);
-                System.out.println("WARNING RunFixity restart(" + startCnt + "):" 
+                log4j.warn("WARNING RunFixity restart(" + startCnt + "):" 
                         + " - Date:" + DateUtil.getCurrentIsoDate()
                         + " - failTime:" + failTime
-                        + " - Exception:" + sqlex
+                        + " - Exception:" + sqlex,sqlex
                 );
                 if (failTime > 1800000) { // 30 minutes up before failure
                     startCnt = 0;
@@ -283,13 +284,13 @@ public class RunFixity implements Runnable
                 }
 
             } catch (TException fe) {
-                fe.printStackTrace();
+                log4j.debug(fe.toString(), fe);
                 setEx(fe);
                 break;
 
             } catch(Exception e)  {
 
-                e.printStackTrace();
+                log4j.debug(e.toString(), e);
                 if (logger != null)
                 {
                     logger.logError(
@@ -325,7 +326,7 @@ public class RunFixity implements Runnable
             log("************leaving RunFixity");
 
         } catch (TException fe) {
-            fe.printStackTrace();
+            log4j.debug(fe.toString(), fe);
             throw fe;
 
         } catch(Exception e)  {
@@ -406,7 +407,7 @@ public class RunFixity implements Runnable
                     nodeStat.add(nodeNumber, entryBytes, nodeTime, streamTime);
                 } catch (Exception bex) { 
                     System.out.println("BEX:" + bex);
-                    bex.printStackTrace();
+                    log4j.debug(bex.toString(), bex);
                 }
                 if (!wrapper.isUpdated()) {
                     verifiedList.add(id);
@@ -477,12 +478,11 @@ public class RunFixity implements Runnable
             log("************Termination of threads");
 
         } catch (TException fe) {
-            fe.printStackTrace();
+            log4j.debug(fe.toString(), fe);
             throw fe;
 
         } catch(Exception e)  {
-
-            e.printStackTrace();
+            log4j.debug(e.toString(), e);
             if (logger != null)
             {
                 logger.logError(
@@ -505,7 +505,7 @@ public class RunFixity implements Runnable
         try {
             throw new TException.GENERAL_EXCEPTION("stop");
         } catch (TException tex) {
-            tex.printStackTrace();
+            log4j.debug(tex.toString(), tex);
             throw tex;
         }
     }

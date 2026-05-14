@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@ package org.cdlib.mrt.audit.action;
 
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.audit.service.FixityServiceConfig;
 import org.cdlib.mrt.audit.service.FixityServiceState;
 
@@ -50,6 +52,7 @@ public class PeriodicServiceReport
     protected static final String NAME = "PeriodicServiceReport";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
     protected FixityServiceConfig fixityServiceConfig = null;
     protected FixityServiceState fixityServiceState = null;
     protected Properties [] rows = null;
@@ -72,7 +75,8 @@ public class PeriodicServiceReport
 
         } catch (Exception ex) {
             log("Exception:" + ex);
-            ex.printStackTrace();
+            
+            log4j.debug("Exception:" + ex,toString(), ex);
             setException(ex);
 
         }

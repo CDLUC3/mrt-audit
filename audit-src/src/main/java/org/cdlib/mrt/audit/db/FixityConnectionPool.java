@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@ import org.cdlib.mrt.utility.*;
 import com.zaxxer.hikari.*;
 //import com.jolbox.bonecp.*;
 import java.sql.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -45,6 +47,8 @@ public class FixityConnectionPool
 
     protected static final String NAME = "FixityConnectionPool";
     protected static final String MESSAGE = NAME + ": ";
+    private static final Logger log4j = LogManager.getLogger();
+    
     private String url, user, password;
     final private long timeout=120000;
     protected HikariDataSource connectionPool = null;
@@ -134,7 +138,7 @@ public class FixityConnectionPool
             }
         } catch (Exception ex) {
             System.out.println("Exception on closeConnection: " + ex);
-            ex.printStackTrace();
+            log4j.debug("Exception on closeConnection:" + ex,toString(), ex);
             
         } finally {
             connectionPool = null;

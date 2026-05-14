@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Enumeration;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.db.FixNames;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
@@ -58,6 +60,7 @@ public class FixityDBUtil
     protected static final String NAME = "FixityDBUtil";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
 
     protected static final String NL = System.getProperty("line.separator");
 
@@ -129,7 +132,7 @@ public class FixityDBUtil
 
         } catch (Exception ex) {
             System.out.println("getEntry Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             return null;
         }
     }
@@ -167,7 +170,7 @@ public class FixityDBUtil
                 + " - exception:" + e;
 
             logger.logError(MESSAGE + "getOperation - " + msg, 0);
-            e.printStackTrace();
+            log4j.error(e.toString(), e);
             throw new TException.SQL_EXCEPTION(msg, e);
         }
      }
@@ -537,7 +540,7 @@ public class FixityDBUtil
 
         } catch (Exception ex) {
             System.out.println("getEntry Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             return null;
         }
      }
@@ -584,7 +587,7 @@ public class FixityDBUtil
             
         } catch (Exception ex) {
             System.out.println("getEntry Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             return null;
         }
         
@@ -601,7 +604,7 @@ public class FixityDBUtil
             return auditPropToFixityMRT(auditProps, connection, logger) ;
         } catch (Exception ex) {
             System.out.println("getEntry Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             return null;
         }
      }

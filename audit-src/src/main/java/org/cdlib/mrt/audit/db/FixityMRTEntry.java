@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@ import java.sql.Connection;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.core.DateState;
 import org.cdlib.mrt.core.FixityStatusType;
 import org.cdlib.mrt.core.MessageDigest;
@@ -56,6 +58,8 @@ public class FixityMRTEntry
     protected static final String MESSAGE = NAME + ": ";
     public static final String DBDATEPATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
+    
     public enum SourceType { merritt, file, web };
     protected long auditid = 0;
     protected long fileid = 0;
@@ -98,7 +102,7 @@ public class FixityMRTEntry
             
         } catch (Exception ex) {
             System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug("Exception:" + ex,toString(), ex);
         }
     }
 
@@ -123,7 +127,7 @@ public class FixityMRTEntry
             
         } catch (Exception ex) {
             System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug("Exception:" + ex,toString(), ex);
         }
     }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.audit.db;
 
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.audit.utility.FixityUtil;
 import org.cdlib.mrt.utility.PropertiesUtil;
@@ -48,6 +50,7 @@ public class FixityContextEntry
     protected static final String NAME = "FixityContextEntry";
     protected static final String MESSAGE = NAME + ": ";
     public static final String DBDATEPATTERN = "yyyy-MM-dd HH:mm:ss";
+    private static final Logger log4j = LogManager.getLogger();
 
     protected long contextKey = 0;
     protected long itemKey = 0;
@@ -63,7 +66,7 @@ public class FixityContextEntry
             setFromProperties(prop);
         } catch (Exception ex) {
             System.out.println(MESSAGE + "Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug("Exception on closeConnection:" + ex,toString(), ex);
         }
     }
 

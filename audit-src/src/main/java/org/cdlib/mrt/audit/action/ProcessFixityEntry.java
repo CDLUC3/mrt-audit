@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@ package org.cdlib.mrt.audit.action;
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.audit.handler.FixityHandler;
 import org.cdlib.mrt.audit.handler.FixityHandlerAbs;
@@ -61,6 +63,7 @@ public class ProcessFixityEntry
     protected static final String NAME = "ProcessFixityEntry";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
 
     public static enum FixityEntryType {add, queue, test, update};
 

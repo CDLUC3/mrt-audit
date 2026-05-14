@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@ import java.sql.Connection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.formatter.FormatterAbs;
 import org.cdlib.mrt.formatter.FormatterInf;
@@ -51,6 +53,7 @@ import org.cdlib.mrt.audit.action.ProcessFixityEntry;
 import org.cdlib.mrt.audit.action.FixityCleanup;
 import org.cdlib.mrt.audit.action.FixityEmailWrapper;
 import org.cdlib.mrt.audit.action.FixityActionAbs;
+import org.cdlib.mrt.audit.action.FixityCleanupProcessing;
 import org.cdlib.mrt.audit.action.FixityReportEntries;
 import org.cdlib.mrt.audit.action.FixityReportItem;
 import org.cdlib.mrt.audit.action.FixityReportSQL;
@@ -75,6 +78,8 @@ public class FixityMRTService
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
     private static final boolean THREADDEBUG = false;
+    
+    private static final Logger log4j = LogManager.getLogger();
     protected LoggerInf logger = null;
     protected Exception exception = null;
     protected FixityServiceConfig fixityServiceConfig = null;
@@ -259,13 +264,13 @@ public class FixityMRTService
             return retState;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }
 
     @Override
-    public FixitySubmittedState doCleanup(String formatType)
+    public FixitySubmittedState doCleanup(int maxSeg)
         throws TException
     {
         if (fixityServiceConfig.isShutdown()) {
@@ -273,28 +278,15 @@ public class FixityMRTService
         }
         FixityItemDB db = null;
         try {
-            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceConfig, logger);
             db = fixityServiceConfig.getDb();
-            FixityEmailWrapper cleanupWrapper = new FixityEmailWrapper(
-                fix,
-                true,
-                fix.getEmailTo(),
-                fix.getEmailFrom(),
-                fix.getEmailSubject(),
-                fix.getEmailMsg(),
-                "xml",
-                db,
-                fixityServiceConfig.getSetupProperties(),
-                logger);
-            ExecutorService threadExecutor = Executors.newFixedThreadPool( 1 );
-            threadExecutor.execute(cleanupWrapper ); // start task1
-            threadExecutor.shutdown();
-            Thread.sleep(3000);
+            FixityCleanupProcessing fcp = FixityCleanupProcessing.getFixityCleanupProcessing(db, 248,maxSeg, logger);
+            int fcpCnt = fcp.process();
+            System.out.println("fcpCnt:" + fcpCnt);
             FixitySubmittedState retState = new FixitySubmittedState(true);
             return retState;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }
@@ -329,7 +321,7 @@ public class FixityMRTService
             return retState;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }
@@ -361,7 +353,7 @@ public class FixityMRTService
             return retState;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }
@@ -408,7 +400,7 @@ public class FixityMRTService
             return retState;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }
@@ -443,7 +435,7 @@ public class FixityMRTService
             return fixityServiceState;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }

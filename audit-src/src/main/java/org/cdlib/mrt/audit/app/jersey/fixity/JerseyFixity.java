@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -223,15 +223,15 @@ public class JerseyFixity
   
 
     @POST
-    @Deprecated
     @Path("cleanup")
     public Response callCleanup(
+            @DefaultValue("0") @QueryParam("segcnt") String segCntS,
             @DefaultValue("xhtml") @QueryParam(KeyNameHttpInf.RESPONSEFORM) String formatType,
             @Context CloseableService cs,
             @Context ServletConfig sc)
         throws TException
     {
-        return cleanupAudit(formatType, cs, sc);
+        return cleanupAudit(segCntS, formatType, cs, sc);
     }  
     
     @POST
@@ -531,6 +531,7 @@ public class JerseyFixity
      * @throws TException 
      */
     public Response cleanupAudit(
+            String segCntS,
             String formatType,
             CloseableService cs,
             ServletConfig sc)
@@ -542,7 +543,13 @@ public class JerseyFixity
                     );
             FixityServiceInit fixityServiceInit = FixityServiceInit.getFixityServiceInit(sc);
             FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
-            fixityService.doCleanup(formatType);
+            int segCnt = 0;
+            try {
+                segCnt = Integer.parseInt(segCntS);
+            } catch (Exception ex) {
+                segCnt = 0;
+            }
+            fixityService.doCleanup(segCnt);
             logger = fixityService.getLogger();
 
             StateInf responseState = fixityService.getFixityServiceStatus();

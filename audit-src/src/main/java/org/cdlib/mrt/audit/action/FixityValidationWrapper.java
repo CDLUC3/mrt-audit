@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.cdlib.mrt.audit.action;
 
 import java.sql.Connection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
@@ -48,6 +50,7 @@ public class FixityValidationWrapper
     protected static final String NAME = "FixityValidationWrapper";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
     protected InvAudit audit = null;
     protected FixityItemDB db = null;
     protected LoggerInf logger = null;
@@ -89,7 +92,7 @@ public class FixityValidationWrapper
 
 
         } catch(Exception e)  {
-            e.printStackTrace();
+            log4j.debug("Exception:" + e,toString(), e);
 
         } finally {
             try {
