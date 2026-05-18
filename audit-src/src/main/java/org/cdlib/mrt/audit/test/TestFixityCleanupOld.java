@@ -38,10 +38,12 @@ import java.sql.Connection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.Properties;
+import java.util.List;
 
 import org.cdlib.mrt.formatter.FormatterAbs;
 import org.cdlib.mrt.formatter.FormatterInf;
 import org.cdlib.mrt.core.DateState;
+import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.TException;
 import org.cdlib.mrt.utility.LoggerInf;
@@ -49,6 +51,7 @@ import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.audit.action.ProcessFixityEntry;
 import org.cdlib.mrt.audit.action.FixityEmailWrapper;
 import org.cdlib.mrt.audit.action.FixityActionAbs;
+import org.cdlib.mrt.audit.action.FixityCleanup;
 import org.cdlib.mrt.audit.action.FixityReportEntries;
 import org.cdlib.mrt.audit.action.FixityReportItem;
 import org.cdlib.mrt.audit.action.FixityReportSQL;
@@ -57,11 +60,10 @@ import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.audit.db.FixityMRTEntry;
 import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.service.*;
-import static org.cdlib.mrt.audit.service.FixityMRTService.formatIt;
+//import static org.cdlib.mrt.audit.service.FixityMRTService.formatIt;
 import org.cdlib.mrt.audit.utility.FixityDBUtil;
 import org.cdlib.mrt.audit.utility.FixityUtil;
 import org.cdlib.mrt.utility.LoggerAbs;
-import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TFrame;
 
 /**
@@ -69,9 +71,9 @@ import org.cdlib.mrt.utility.TFrame;
  * @author  dloy
  */
 
-public class TestNearLine
+public class TestFixityCleanupOld
 {
-    private static final String NAME = "TestNearLine";
+    private static final String NAME = "TestFixityCleanup";
     private static final String MESSAGE = NAME + ": ";
     private static final String NL = System.getProperty("line.separator");
     private static final boolean DEBUG = true;
@@ -90,37 +92,27 @@ public class TestNearLine
         Connection connection = null;
         try {
             String propertyList[] = {
-                "resources/TestNearLine.properties"};
+                //"resources/TestFixityCleanup.properties"};
+                "resources/TestFixityCleanupStage.properties"};
             tFrame = new TFrame(propertyList, "TestFixity");
             Properties prop = tFrame.getProperties();
-            System.out.println(PropertiesUtil.dumpProperties("TestNearLine.properties", prop));
             fixityServiceProperties
                     = FixityServiceConfig.useYaml();
-            //FixityMRTService service = FixityMRTService.getFixityService(fixityServiceProperties);
-            //StateInf state = service.getFixityServiceState();
-            LoggerInf logger = fixityServiceProperties.getLogger();
-            //LoggerInf logger = fixityServiceProperties.getLogger();
-            
-            //String format = formatIt(logger, state);
-            //System.out.println("Initial Service State:" + NL + format);
-            String idS = prop.getProperty("id");
-            if (StringUtil.isAllBlank(idS)) {
-                throw new TException.INVALID_OR_MISSING_PARM("id missing");
+            LoggerInf logger = LoggerAbs.getTFileLogger("testFormatter", 1, 10);
+            FixityCleanup fix = FixityActionAbs.getFixityCleanup(fixityServiceProperties, logger);
+         
+            System.out.println("from:" + fix.getEmailFrom());
+            System.out.println("to:" + fix.getEmailTo());
+            System.out.println("subject:" + fix.getEmailSubject());
+            System.out.println("msg:" + fix.getEmailMsg());
+            if (false) return;
+            FixitySelectState state = fix.call();
+            List<Properties> list = state.retrieveRows();
+            for (Properties outProp : list) {
+                System.out.println(PropertiesUtil.dumpProperties("FixityCleanup", outProp));
             }
-            long id = Long.parseLong(idS);
-            System.out.println("id=" + id);
-
-            db = fixityServiceProperties.getDb();
-            System.out.println("****TestUpdate*****");
-            //state = service.setFixityRun();
-            connection = db.getConnection(true);
-            doit(connection, id, logger);
-            connection.close();
-            //System.out.println(mrtEntry.dump(MESSAGE));
-            //state = service.setFixityStop();
-            //String format = formatIt(logger, state);
-            //System.out.println("setFiityRun 2:" + NL + format);
-
+            String report = formatIt(logger, state);
+            System.out.println("report\n" + report);
         } catch(Exception e) {
                 System.out.println(
                     "Main: Encountered exception:" + e);
@@ -135,24 +127,14 @@ public class TestNearLine
             } catch (Exception ex) { }
         }
     }
-    
-    public static void doit(Connection connection, long id, LoggerInf localLog)
-        throws Exception
-    {
-        InvAudit audit = FixityDBUtil.getAudit(connection, id, localLog);
-        System.out.println(PropertiesUtil.dumpProperties("audit>>>", audit.retrieveProp()));
-        FixityMRTEntry mrtEntry = FixityDBUtil.getMRTEntry(audit, connection, localLog);
-        FixityUtil.runTest(mrtEntry, 30000, localLog);
-        System.out.println(mrtEntry.dump("TestNearLine"));
-        
-    }
 
     public static String formatIt(
             LoggerInf logger,
             StateInf responseState)
     {
         try {
-           FormatterInf anvl = FormatterAbs.getJSONFormatter(logger);
+           //FormatterInf anvl = FormatterAbs.getJSONFormatter(logger);
+           FormatterInf anvl = FormatterAbs.getXMLFormatter(logger);
            ByteArrayOutputStream outStream = new ByteArrayOutputStream(5000);
            PrintStream  stream = new PrintStream(outStream, true, "utf-8");
            anvl.format(responseState, stream);

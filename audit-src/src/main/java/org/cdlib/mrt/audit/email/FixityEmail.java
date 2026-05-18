@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.formatter.FormatInfo;
 import org.cdlib.mrt.utility.PropertiesUtil;
 import org.cdlib.mrt.utility.TException;
@@ -51,6 +53,7 @@ import org.cdlib.mrt.utility.TException;
 */
 public final class FixityEmail
 {
+    private static final Logger log4j = LogManager.getLogger();
     protected Session session = null;
     public FixityEmail(Properties emailProp)
     {

@@ -34,7 +34,7 @@
     
     <servlet>
         <servlet-name>Startup Daemon</servlet-name>
-        <servlet-class>org.cdlib.mrt.audit.app.jersey.fixity.StartInv</servlet-class>
+        <servlet-class>org.cdlib.mrt.audit.app.jersey.fixity.AuditHttp</servlet-class>
         <init-param>
             <param-name>loggerProperties</param-name>
             <param-value>resources/TStorageLogger.properties</param-value>

@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,8 +98,7 @@ public class FixityHandlerStandard
             throw tex;
 
         } catch (Exception ex) {
-            System.out.println("runFixity Exception(" + entry.dump("runFixity Exception"));
-            ex.printStackTrace();
+            log4j.debug("runFixity Exception(" + entry.dump("runFixity Exception"), ex);
             throw new TException.GENERAL_EXCEPTION(ex);
         }
 

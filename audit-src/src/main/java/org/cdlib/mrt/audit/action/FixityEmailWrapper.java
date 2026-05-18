@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.cdlib.mrt.audit.db.FixityItemDB;
 import org.cdlib.mrt.audit.email.FixityEmail;
@@ -57,6 +59,7 @@ public class FixityEmailWrapper
     protected static final String NAME = "FixityEmailWrapper";
     protected static final String MESSAGE = NAME + ": ";
     protected static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
 
     protected boolean autoCommit = true;
     //protected String select = null;
@@ -194,6 +197,7 @@ public class FixityEmailWrapper
             emailServ(emailTo, dispSubject, disp);
 
         } catch(Exception e)  {
+            log4j.debug(e.toString(), e);
             e.printStackTrace();
 
         } finally {

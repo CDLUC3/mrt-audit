@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ package org.cdlib.mrt.audit.app.jersey.fixity;
 
 
 
+import java.util.LinkedList;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +41,8 @@ import org.apache.logging.log4j.Logger;
 import org.cdlib.mrt.utility.StateInf;
 import org.cdlib.mrt.utility.StringUtil;
 import org.cdlib.mrt.audit.app.FixityServiceInit;
+import org.cdlib.mrt.audit.service.RunFixity;
+import org.cdlib.mrt.audit.db.InvAudit;
 import org.cdlib.mrt.audit.service.FixityMRTServiceInf;
 import org.cdlib.mrt.audit.service.FixityServiceState;
 
@@ -48,7 +51,7 @@ import org.cdlib.mrt.audit.service.FixityServiceState;
  * @author  David Loy
  */
 
-public class StartInv extends HttpServlet
+public class AuditHttp extends HttpServlet
 {
 
     protected static final String NAME = "StartInv";
@@ -68,9 +71,11 @@ public class StartInv extends HttpServlet
             FixityMRTServiceInf fixityService = fixityServiceInit.getFixityService();
             log4j.info("runFixity");
             StateInf responseState = fixityService.setFixityRun();
+            //System.out.println("doCleanup 2");
+            fixityService.doCleanup(1);
             
         } catch (ServletException se) {
-            se.printStackTrace();
+            log4j.debug("Exception:" + se,toString(), se);
             throw se;
 
         } catch (Exception ex) {
@@ -78,7 +83,17 @@ public class StartInv extends HttpServlet
             throw new RuntimeException("BYE");
         }
     }
-
+    
+    @Override
+    public void destroy() {
+        // Release resources (e.g., close DB connection)
+        try {
+            System.out.println("StartInv called with destroy:" + System.currentTimeMillis());
+        } catch (Exception e) {
+            System.out.println("StartInv called with destroy exception(" + System.currentTimeMillis() + "):" + e);
+        }
+    }
+    
     public FixityServiceState getResponseState() {
         return responseState;
     }

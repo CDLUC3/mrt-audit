@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.sql.Connection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import org.cdlib.mrt.audit.db.InvAudit;
@@ -87,6 +89,7 @@ public class FixityOwn
     private static final String MESSAGE = NAME + ": ";
 
     private static final boolean DEBUG = false;
+    private static final Logger log4j = LogManager.getLogger();
     
     /**
      * Get items owned by this Audit server
@@ -158,7 +161,7 @@ public class FixityOwn
         throws TException
     {
         //System.out.println("getOwnListAudit entered capacity=" + capacity);
-        LinkedList<InvAudit> auditList = new LinkedList<InvAudit>();
+        LinkedList<InvAudit> auditList = new LinkedList<>();
         try {
             ownConnect.setAutoCommit(false);
             if (auditQualify == null) {
@@ -208,6 +211,90 @@ public class FixityOwn
                 System.out.println("WARNING rollback fails:" + ex);
             }
             return new LinkedList<InvAudit>();
+
+        }
+    } 
+    
+    public static LinkedList<Long> doCleanupAudit(Connection ownConnect, 
+            int capacity,
+            LoggerInf logger)
+        throws TException
+    {
+        
+        LinkedList<Long> auditList = new LinkedList<>();
+        try {
+            String sql = "select id "
+                    + "from " + FixNames.AUDIT_TABLE + " "
+                    + "WHERE verified < NOW() - INTERVAL 2 DAY AND STATUS='processing'"
+                    + "order by verified "
+                    + "limit " + capacity + " "
+                    + "for update "
+                    + ";";
+            log4j.trace("own sql:" + sql);
+            Properties [] ids = FixityDBUtil.cmd(ownConnect, sql, logger);
+
+            if ((ids == null) || (ids.length==0)) {
+                ownConnect.rollback();
+                return new LinkedList<>();
+            }
+            String concatid = "";
+            for (Properties idP : ids) {
+                String idS = idP.getProperty("id");
+                long id = Long.parseLong(idS);
+                auditList.add(id);
+                if (concatid.length() > 0 ) {
+                    concatid = concatid + ",";
+                }
+                concatid += id;
+            }
+            log4j.trace("doCleanupAudit.auditList:" + auditList.size()
+                    + " - concatid=" + concatid
+            );
+
+            DateState verified = new DateState();
+            String verifiedDB= FixityUtil.getDBDate(verified);
+            String sqlUpdate = "update inv_audits "
+            + "set verified=null,status='unverified' "
+            + "where id in (" + concatid + "); ";
+
+            int updateCnt = FixityDBUtil.update(ownConnect, sqlUpdate, logger);
+            //System.out.println("updateCnt:" + updateCnt);
+            ownConnect.commit();
+            log4j.debug("doCleanupAudit.COMMIT:" + auditList.size()
+                    + " - concatid=" + concatid
+            );
+            return auditList;
+
+        } catch (Exception ex) {
+            try {
+                ownConnect.rollback();
+                
+            } catch (Exception exr) {
+                System.out.println("WARNING rollback fails:" + ex);
+            }
+            throw new TException(ex);
+
+        }
+    }    public static int getCleanupCnt(Connection ownConnect, 
+            int capacity,
+            LoggerInf logger)
+        throws TException
+    {
+        
+        
+        try {
+            String sql = "select id "
+                    + "from " + FixNames.AUDIT_TABLE + " "
+                    + "WHERE verified < NOW() - INTERVAL 2 DAY AND STATUS='processing'"
+                    + ";";
+            log4j.trace("own sql:" + sql);
+            Properties [] ids = FixityDBUtil.cmd(ownConnect, sql, logger);
+
+            if ((ids == null) || (ids.length == 0)) return 0;
+            return ids.length;
+
+        } catch (Exception ex) {
+            return 0;
 
         }
     }

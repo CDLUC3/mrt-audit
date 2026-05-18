@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (c) 2005-2012, Regents of the University of California
+Copyright (c) 2005-2026, Regents of the University of California
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -442,12 +442,12 @@ public class FixityUtil
             
         } catch (TException tex) {
             System.out.println("TException:" + tex);
-            tex.printStackTrace();
+            log4j.debug(tex.toString(), tex);
             throw tex;
             
         } catch (Exception ex) {
             System.out.println("Exception:" + ex);
-            ex.printStackTrace();
+            log4j.debug(ex.toString(), ex);
             throw new TException(ex);
         }
     }
@@ -678,7 +678,7 @@ public class FixityUtil
 
         } catch (Exception ex) {
             System.out.print("****>>>");
-            ex.printStackTrace();
+            log4j.error(ex.toString(), ex);
             if (DEBUG) {
                 System.out.println("processStorageFixity exception:" + ex);
                 ex.printStackTrace();
