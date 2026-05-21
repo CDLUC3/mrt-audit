@@ -72,7 +72,7 @@ public class AuditHttp extends HttpServlet
             log4j.info("runFixity");
             StateInf responseState = fixityService.setFixityRun();
             //System.out.println("doCleanup 2");
-            fixityService.doCleanup(1);
+            fixityService.doCleanup(0);
             
         } catch (ServletException se) {
             log4j.debug("Exception:" + se,toString(), se);
