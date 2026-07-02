@@ -12,45 +12,6 @@ The work that this service performs is determined by querying the Merritt Invent
 ## Original System Specifications
 - [Merritt Audit Service](https://github.com/CDLUC3/mrt-doc/blob/main/doc/Merritt-audit-service-latest.pdf)
 
-## Component Diagram
-```mermaid
-%%{init: {'theme': 'neutral', 'securityLevel': 'loose', 'themeVariables': {'fontFamily': 'arial'}}}%%
-graph TD
-  accTitle: 'Illustration of Fixity Process'
-  accDescr {
-    Audit Service performs fixity check on S3, SDSC and Wasabi content.
-    Audit Service validates metadata for Glacier content.
-    Fixity results are compared to baseline values in RDS.
-    Fixity status dates are saved to RDS.
-  }
-  RDS[(Inventory DB)]
-  AUDIT(AUDIT - Fixity Check)
-  click AUDIT href "https://github.com/CDLUC3/mrt-audit" "source code"
-
-  subgraph flowchart
-    subgraph cloud_storage
-      CLDS3[/AWS S3/]
-      CLDSDSC[/SDSC Minio/]
-      CLDWAS[/Wasabi/]
-      CLDGLC[/Glacier/]
-    end
-
-    RDS --> |acquire work| AUDIT
-    AUDIT --> |fixity check| CLDS3
-    AUDIT --> |metadata check| CLDGLC
-    AUDIT --> |fixity check| CLDWAS
-    AUDIT --> |fixity check| CLDSDSC
-    AUDIT -.-> |record fixity| RDS
-  end
-  style CLDS3 fill:#77913C
-  style CLDGLC fill:#77913C
-  style CLDSDSC fill:#77913C
-  style CLDWAS fill:#77913C
-  style RDS fill:#F68D2F
-
-  style AUDIT stroke:red,stroke-width:4px
-```
-
 ## Dependencies
 
 This code depends on the following Merritt Libraries.
