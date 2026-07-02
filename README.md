@@ -16,6 +16,13 @@ The work that this service performs is determined by querying the Merritt Invent
 ```mermaid
 %%{init: {'theme': 'neutral', 'securityLevel': 'loose', 'themeVariables': {'fontFamily': 'arial'}}}%%
 graph TD
+  accTitle: 'Illustration of Fixity Process'
+  accDescr {
+    Audit Service performs fixity check on S3, SDSC and Wasabi content.
+    Audit Service validates metadata for Glacier content.
+    Fixity results are compared to baseline values in RDS.
+    Fixity status dates are saved to RDS.
+  }
   RDS[(Inventory DB)]
   AUDIT(AUDIT - Fixity Check)
   click AUDIT href "https://github.com/CDLUC3/mrt-audit" "source code"
