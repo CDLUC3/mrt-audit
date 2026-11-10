@@ -1,45 +1,5 @@
 which-audit-info: "{!ENV: MERRITT_AUDIT_INFO !DEFAULT: audit-info}"
   
-audit-info:
-  service:
-    threadPool: "{!SSM: audit/config/threadPool !DEFAULT: 5}"
-    nodePath: "{!SSM: audit/config/nodePath  !DEFAULT: yaml:2}"
-    auditQualify: "{!SSM: audit/config/auditQualify !DEFAULT: NONE}"
-    intervalDays: "{!SSM: audit/config/intervalDays !DEFAULT: 0}"
-    queueSleepMs: "{!SSM: audit/config/queueSleepMs !DEFAULT: 0}"
-    queueCapacity: "{!SSM: audit/config/queueCapacity !DEFAULT: 100}"
-    sizeChecksumBuffer: "{!SSM: audit/config/sizeChecksumBuffer !DEFAULT: 32000000}"
-    
-  state:
-    id: audit
-    name: UC3
-    description: "UC3 audit micro-service"
-    version: "audit version"
-    serviceScheme: "Fixity/0.2/1.0"
-
-  fileLogger:
-    messageMaximumLevel: "{!SSM: audit/config/log/messageMaximumLevel !DEFAULT: 5}"
-    messageMaximumError: "{!SSM: audit/config/log/messageMaximumError !DEFAULT: 10}"
-    path: "{!ENV: LOG_AUDIT}"
-    name: audit
-    qualifier: yyMMdd
-    
-  mail:
-    smtp: "DummyMailSMTP"
-    from: "DummyMailFrom"
-    
-  cleanup:
-    subject: "DummyCleanupSubject"
-    to: "DummyCleanupTo"
-    msg: "DummyCleanupMessage"
-    
-  db:
-    user: "{!SSM: inv/readwrite/db-user}"
-    password: "{!SSM: inv/readwrite/db-password}"
-    host: "{!SSM: inv/db-host}"
-    name: "{!SSM: inv/db-name}"
-    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
-
 audit-info-docker: &docker
   # ecs-stg:
   #   AUDIT_THREAD_POOL: 2
@@ -91,16 +51,6 @@ audit-info-docker: &docker
     password: password
     encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
 
-inv-ecs-dev: 
-  <<: *docker
-
-  db:
-    user: "{!SSM: /uc3/mrt/ecs/billing/readwrite/db-user !DEFAULT: user}"
-    password: "{!SSM: /uc3/mrt/ecs/billing/readwrite/db-password !DEFAULT: password}"
-    host: "{!SSM: /uc3/mrt/ecs/billing/db-host !DEFAULT: db-container}"
-    name: "inv"
-    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"   # schema won't load if it's utf8mb4
-
 inv-ecs: 
   <<: *docker
 
@@ -110,3 +60,13 @@ inv-ecs:
     host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
     encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
+
+inv-ecs-dev: 
+  <<: *docker
+
+  db:
+    user: "{!SSM: inv/readwrite/db-user}"
+    password: "{!SSM: inv/readwrite/db-password}"
+    host: "{!SSM: inv/db-host}"
+    name: "{!SSM: inv/db-name}"
+    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"   # schema won't load if it's utf8mb4
