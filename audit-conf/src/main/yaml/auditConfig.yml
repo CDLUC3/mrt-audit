@@ -59,14 +59,4 @@ inv-ecs:
     password: "{!SSM: inv/readwrite/db-password}"
     host: "{!SSM: inv/db-host}"
     name: "{!SSM: inv/db-name}"
-    encoding: "{!SSM: inv/db-encoding !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
-
-inv-ecs-dev: 
-  <<: *docker
-
-  db:
-    user: "{!SSM: inv/readwrite/db-user}"
-    password: "{!SSM: inv/readwrite/db-password}"
-    host: "{!SSM: inv/db-host}"
-    name: "{!SSM: inv/db-name}"
-    encoding: "characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"   # schema won't load if it's utf8mb4
+    encoding: "{!ENV: RDS_ENCODING !DEFAULT: characterEncoding=UTF-8&characterSetResults=UTF-8}"
