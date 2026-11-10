@@ -1,4 +1,4 @@
-which-audit-info: "{!ENV: MERRITT_AUDIT_INFO !DEFAULT: audit-info}"
+which-audit-info: "{!ENV: MERRITT_AUDIT_INFO !DEFAULT: audit-info-docker}"
   
 audit-info-docker: &docker
   # ecs-stg:
