@@ -18,7 +18,7 @@ services:
     container_name: it-server
     image: ${ECR_REGISTRY}/merritt-tomcat:dev
     volumes:
-    - "${MDIR}/audit-it/target/mrt-audit-it-3.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtaudit.war"
+    - "${MDIR}/audit-it/target/mrt-audit-it-4.0-SNAPSHOT.war:/usr/local/tomcat/webapps/mrtaudit.war"
     ports:
     - published: 8080
       target: 8080
@@ -43,5 +43,11 @@ services:
       target: 9000
     - published: 8098
       target: 9001
+    networks:
+      merrittnet:
+  minio-init:
+    container_name: minio-init
+    image: ${ECR_REGISTRY}/mrt-rustfs-it-with-content:dev
+    entrypoint: ["/content-init.sh"]
     networks:
       merrittnet:
